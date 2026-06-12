@@ -1,9 +1,6 @@
-# Local AI Coding Facility
+# Local Infrastructure for Coding Assistance
 
-A Docker Compose deployment for shared, local coding-agent infrastructure.
-It runs inference, embeddings, and optional curated-document retrieval while
-keeping OpenCode, source code, compilers, tests, and permissions inside each
-project's own dev container.
+A Docker Compose deployment for shared, local coding-agent infrastructure. It runs inference, embeddings, and optional curated-document retrieval while keeping OpenCode-like clients, source code, compilers, tests, and permissions inside each project's own dev container.
 
 ```mermaid
 flowchart LR

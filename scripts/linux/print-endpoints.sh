@@ -18,7 +18,7 @@ From another dev container:
   llama.cpp: http://host.docker.internal:${LLAMA_CPP_HOST_PORT:-8080}/v1
   GGUF embed: http://host.docker.internal:${LLAMA_CPP_EMBED_HOST_PORT:-8081}/v1
 
-On ${COMPOSE_PROJECT_NAME:-local-ai-coding}-network:
+On ${COMPOSE_PROJECT_NAME:-coding-assistance-infra}-network:
   Ollama:    http://ollama:11434/v1
   llama.cpp: http://llama-cpp:8080/v1
   GGUF embed: http://llama-cpp-embeddings:8080/v1

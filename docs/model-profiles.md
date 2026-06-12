@@ -1,6 +1,6 @@
 # Model Profiles
 
-## 16 GB Workstation
+## 16 GB VRAM Workstation
 
 Start with:
 

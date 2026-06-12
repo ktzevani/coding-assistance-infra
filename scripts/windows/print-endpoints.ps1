@@ -6,7 +6,7 @@ $llamaPort = Get-EnvironmentValue -Name "LLAMA_CPP_HOST_PORT" -Default "8080"
 $embedPort = Get-EnvironmentValue -Name "LLAMA_CPP_EMBED_HOST_PORT" -Default "8081"
 $qdrantPort = Get-EnvironmentValue -Name "QDRANT_HOST_PORT" -Default "6333"
 $ragPort = Get-EnvironmentValue -Name "RAG_MCP_HOST_PORT" -Default "8765"
-$projectName = Get-EnvironmentValue -Name "COMPOSE_PROJECT_NAME" -Default "local-ai-coding"
+$projectName = Get-EnvironmentValue -Name "COMPOSE_PROJECT_NAME" -Default "coding-assistance-infra"
 
 @"
 Host endpoints:

@@ -12,7 +12,7 @@ services:
   rag-mcp:
     build:
       context: images/rag-mcp
-    image: local/rag-mcp:latest
+    image: ${COMPOSE_PROJECT_NAME:-coding-assistance-infra}/rag-mcp:latest
     restart: unless-stopped
     environment:
       QDRANT_URL: http://qdrant:6333

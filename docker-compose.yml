@@ -1,4 +1,4 @@
-name: ${COMPOSE_PROJECT_NAME:-local-ai-coding}
+name: ${COMPOSE_PROJECT_NAME:-coding-assistance-infra}
 
 services:
   ollama:
@@ -28,7 +28,7 @@ services:
       context: images/llama-cpp
       args:
         LLAMA_CPP_BASE_IMAGE: ${LLAMA_CPP_BASE_IMAGE:-ghcr.io/ggml-org/llama.cpp:server}
-    image: local/llama-cpp-server:latest
+    image: ${COMPOSE_PROJECT_NAME:-coding-assistance-infra}/llama-cpp-server:latest
     restart: unless-stopped
     environment:
       LLAMA_CPP_MODEL_PATH: ${LLAMA_CPP_MODEL_PATH:-/models/qwen3.6-35b-a3b.gguf}
@@ -54,7 +54,7 @@ services:
       context: images/llama-cpp
       args:
         LLAMA_CPP_BASE_IMAGE: ${LLAMA_CPP_BASE_IMAGE:-ghcr.io/ggml-org/llama.cpp:server}
-    image: local/llama-cpp-server:latest
+    image: ${COMPOSE_PROJECT_NAME:-coding-assistance-infra}/llama-cpp-server:latest
     restart: unless-stopped
     entrypoint: ["/usr/local/bin/local-ai-embedding-entrypoint.sh"]
     environment:
@@ -79,7 +79,7 @@ services:
     profiles: ["init"]
     build:
       context: images/model-init
-    image: local/model-init:latest
+    image: ${COMPOSE_PROJECT_NAME:-coding-assistance-infra}/model-init:latest
     environment:
       OLLAMA_URL: http://ollama:11434
       FAST_MODEL_OLLAMA: ${FAST_MODEL_OLLAMA:-devstral:24b}
@@ -94,7 +94,7 @@ services:
     profiles: ["diagnostics"]
     build:
       context: images/diagnostics
-    image: local/local-ai-diagnostics:latest
+    image: ${COMPOSE_PROJECT_NAME:-coding-assistance-infra}/local-ai-diagnostics:latest
     environment:
       OLLAMA_URL: http://ollama:11434
       LLAMA_CPP_URL: http://llama-cpp:8080
@@ -108,4 +108,4 @@ services:
 
 networks:
   local-ai:
-    name: ${COMPOSE_PROJECT_NAME:-local-ai-coding}-network
+    name: ${COMPOSE_PROJECT_NAME:-coding-assistance-infra}-network
