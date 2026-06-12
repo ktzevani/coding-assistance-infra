@@ -27,6 +27,14 @@
       }
     }
   },
+  "mcp": {
+    "rag-mcp": {
+      "type": "remote",
+      "url": "http://host.docker.internal:8765/mcp",
+      "enabled": true,
+      "oauth": false
+    }
+  },
   "permission": {
     "bash": "ask",
     "edit": "ask",

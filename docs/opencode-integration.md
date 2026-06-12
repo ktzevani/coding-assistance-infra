@@ -9,11 +9,16 @@ example uses the default Ollama `devstral:24b` model and llama.cpp's served
 `local` model ID. Update the Ollama key and default model when
 `FAST_MODEL_OLLAMA` changes.
 
+The example enables the central `rag-mcp` HTTP endpoint as a remote MCP server.
+It disables OAuth because this loopback-only deployment does not provide OAuth.
+Review or disable this MCP entry before using an untrusted project.
+
 Use host-gateway URLs when the project is on another Docker network:
 
 ```text
 http://host.docker.internal:11434/v1
 http://host.docker.internal:8080/v1
+http://host.docker.internal:8765/mcp
 ```
 
 On Linux, add `host.docker.internal:host-gateway` to that dev container. If the
@@ -22,6 +27,7 @@ project container joins `${COMPOSE_PROJECT_NAME}-network`, use service DNS:
 ```text
 http://ollama:11434/v1
 http://llama-cpp:8080/v1
+http://rag-mcp:8765/mcp
 ```
 
 Keep conservative tool permissions and review project-local OpenCode and MCP

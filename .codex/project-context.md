@@ -322,8 +322,6 @@ workspaces/                            Read-only project mounts for RAG
   and context-budget policies.
 - RAG currently depends on the base Ollama service even when GGUF embeddings
   are selected, because Ollama is always part of the base deployment.
-- OpenCode MCP configuration for `rag-mcp` is documented conceptually but is
-  not included in the provider snippet yet.
 
 ## Next Sensible Work
 
@@ -339,7 +337,6 @@ With explicit approval for Docker/runtime validation:
 5. Exercise Ollama and llama.cpp `/v1/embeddings` through `rag-mcp`.
 6. Add focused tests for embedding response parsing, dimension mismatch, path
    confinement, curated-file selection, and backend/model filtering.
-7. Add an example OpenCode MCP configuration for `rag-mcp`.
 
 Do not perform runtime steps without explicit user approval.
 
