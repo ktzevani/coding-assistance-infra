@@ -326,9 +326,6 @@ workspaces/                            Read-only project mounts for RAG
   but is not read by the server.
 - `config/rag/collections.example.yaml` is mounted into `rag-mcp`, but the
   server currently hardcodes its include/exclude patterns and does not read it.
-- Copying `.env.example` keeps both llama.cpp GPU-layer settings at `0`, so
-  selecting the NVIDIA override does not enable llama.cpp GPU offload unless
-  the operator changes those values.
 - Documentation says a Qdrant collection cannot mix embedding models. The
   implementation rejects dimension changes and filters searches by backend and
   model, but permits same-dimension models in one collection.

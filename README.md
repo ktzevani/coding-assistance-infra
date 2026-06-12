@@ -104,9 +104,10 @@ LLAMA_CPP_MODEL_PATH=/models/my-coding-model.gguf
 .\scripts\windows\up.ps1 nvidia llama
 ```
 
-The CPU profile uses the official `server` image and NVIDIA uses
-`server-cuda`. Context, threads, batching, KV-cache types, parallel slots, and
-GPU layers are all environment-controlled.
+The CPU profile uses the official `server` image with GPU layers set to `0`;
+NVIDIA uses `server-cuda` with GPU layers defaulting to `-1` for full offload.
+Context, threads, batching, KV-cache types, parallel slots, and GPU layers are
+all environment-controlled.
 
 ## Optional RAG
 

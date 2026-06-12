@@ -17,10 +17,12 @@ On a Windows Docker Desktop/WSL 2 host:
 ```
 
 The override requests GPUs with Compose `gpus: all` and selects the official
-llama.cpp `server-cuda` image. Set `LLAMA_CPP_N_GPU_LAYERS` to control offload.
-The optional GGUF embedding server uses the same CUDA image and has its own
-`LLAMA_CPP_EMBED_N_GPU_LAYERS` setting. On a 16 GB GPU, a small embedding GGUF
-is practical, but it still competes with coding models for VRAM.
+llama.cpp `server-cuda` image. Both llama.cpp services default to `-1` GPU
+layers in this profile for full offload. Set `LLAMA_CPP_N_GPU_LAYERS` and
+`LLAMA_CPP_EMBED_N_GPU_LAYERS` in `.env` only when explicit limits are needed.
+The optional GGUF embedding server uses the same CUDA image. On a 16 GB GPU,
+a small embedding GGUF is practical, but it still competes with coding models
+for VRAM.
 
 ## AMD / ROCm
 
