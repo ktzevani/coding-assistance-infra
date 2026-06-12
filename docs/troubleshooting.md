@@ -24,15 +24,18 @@ after an out-of-memory failure.
 
 ## RAG Indexing Fails
 
-Confirm the project is mounted beneath `WORKSPACE_ROOT`, the embedding model is
-pulled, and `EMBEDDING_DIM` matches the model. Inspect:
+Confirm the project is mounted beneath `WORKSPACE_ROOT` and the selected
+embedding backend is available. For GGUF embeddings, confirm the model path or
+Hugging Face repository, pooling mode, and `gguf-embeddings` feature. Inspect:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.rag.yml logs rag-mcp qdrant
 ```
 
+If Qdrant reports a dimension mismatch after changing embedding models, use a
+new `QDRANT_COLLECTION` or rebuild the existing collection.
+
 ## Project Container Cannot Reach Host
 
 Add `host.docker.internal:host-gateway` to Linux dev containers, or join the
 facility's user-defined network and use service names.
-

@@ -1,0 +1,7 @@
+services:
+  rag-mcp:
+    environment:
+      EMBEDDING_BACKEND: llama-cpp
+      EMBEDDING_BASE_URL: http://llama-cpp-embeddings:8080
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-local}
+

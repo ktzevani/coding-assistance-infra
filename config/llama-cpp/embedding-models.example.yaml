@@ -1,0 +1,47 @@
+profiles:
+  qwen3-embedding-0.6b:
+    source: Qwen/Qwen3-Embedding-0.6B-GGUF:Q8_0
+    local_path: /models/qwen3-embedding-0.6b-q8_0.gguf
+    pooling: last
+    dimensions: 1024
+    context: 32768
+    notes: Multilingual and code retrieval; recommended general GGUF option.
+
+  qwen3-embedding-4b:
+    source: Qwen/Qwen3-Embedding-4B-GGUF:Q8_0
+    pooling: last
+    dimensions: 2560
+    context: 32768
+    notes: Higher-quality option when memory and latency permit.
+
+  qwen3-embedding-8b:
+    source: Qwen/Qwen3-Embedding-8B-GGUF:Q8_0
+    pooling: last
+    dimensions: 4096
+    context: 32768
+    notes: Large embedding profile; likely excessive beside a coding model on 16 GB.
+
+  embeddinggemma-300m:
+    source: ggml-org/embeddinggemma-300M-GGUF:Q8_0
+    local_path: /models/embeddinggemma-300M-Q8_0.gguf
+    pooling: ""
+    dimensions: 768
+    context: 2048
+    notes: Small resource-efficient multilingual option.
+
+  nomic-embed-text-v1.5:
+    source: nomic-ai/nomic-embed-text-v1.5-GGUF
+    local_path: /models/nomic-embed-text-v1.5.Q8_0.gguf
+    pooling: mean
+    dimensions: 768
+    context: 8192
+    document_prefix: "search_document: "
+    query_prefix: "search_query: "
+    notes: English-focused; task prefixes are required for good retrieval.
+
+  bge-m3:
+    source: Community GGUF conversion of BAAI/bge-m3
+    pooling: cls
+    dimensions: 1024
+    context: 8192
+    notes: Multilingual long-document option; verify conversion provenance.

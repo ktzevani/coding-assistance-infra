@@ -6,3 +6,9 @@ services:
     environment:
       LLAMA_CPP_N_GPU_LAYERS: ${LLAMA_CPP_N_GPU_LAYERS:-0}
 
+  llama-cpp-embeddings:
+    build:
+      args:
+        LLAMA_CPP_BASE_IMAGE: ${LLAMA_CPP_BASE_IMAGE:-ghcr.io/ggml-org/llama.cpp:server}
+    environment:
+      LLAMA_CPP_EMBED_N_GPU_LAYERS: ${LLAMA_CPP_EMBED_N_GPU_LAYERS:-0}

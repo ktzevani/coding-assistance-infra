@@ -31,6 +31,7 @@ fi
 check "Ollama native API" "${OLLAMA_URL:-http://ollama:11434}/api/tags"
 check "Ollama OpenAI API" "${OLLAMA_URL:-http://ollama:11434}/v1/models"
 check "llama.cpp OpenAI API" "${LLAMA_CPP_URL:-http://llama-cpp:8080}/v1/models"
+check "llama.cpp embedding API" "${LLAMA_CPP_EMBED_URL:-http://llama-cpp-embeddings:8080}/v1/models"
 check "Qdrant API" "${QDRANT_URL:-http://qdrant:6333}/collections"
 post_check \
     "Ollama embeddings" \
@@ -44,3 +45,7 @@ post_check \
     "llama.cpp chat" \
     "${LLAMA_CPP_URL:-http://llama-cpp:8080}/v1/chat/completions" \
     '{"model":"local","messages":[{"role":"user","content":"Reply OK"}],"max_tokens":4}'
+post_check \
+    "llama.cpp embeddings" \
+    "${LLAMA_CPP_EMBED_URL:-http://llama-cpp-embeddings:8080}/v1/embeddings" \
+    "{\"model\":\"${EMBEDDING_MODEL:-local}\",\"input\":\"ping\"}"

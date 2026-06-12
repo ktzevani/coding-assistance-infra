@@ -8,7 +8,7 @@ Start with:
 |---|---|---|
 | `code-fast` | Ollama | Coding model, 8k context, one parallel request |
 | `code-strong` | llama.cpp | Manually selected GGUF, 16k context, tuned offload |
-| `embeddings` | Ollama | Lightweight embedding model |
+| `embeddings` | Ollama or llama.cpp | Lightweight embedding model or GGUF |
 
 Do not assume a model tag or quantization fits merely from parameter count.
 Weights, KV cache, runtime buffers, context, batch size, and concurrent
@@ -26,3 +26,5 @@ time while watching GPU and host memory.
 The current `.env` profile layer can later be replaced by a YAML loader without
 changing service boundaries. Example declarations are under `config/`.
 
+See `docs/embedding-models.md` for GGUF embedding choices and required pooling
+or query-prefix settings.

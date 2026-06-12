@@ -31,6 +31,7 @@ post_check() {
 check "Ollama native API" "http://127.0.0.1:${OLLAMA_HOST_PORT:-11434}/api/tags"
 check "Ollama OpenAI API" "http://127.0.0.1:${OLLAMA_HOST_PORT:-11434}/v1/models"
 check "llama.cpp OpenAI API" "http://127.0.0.1:${LLAMA_CPP_HOST_PORT:-8080}/v1/models"
+check "llama.cpp embedding API" "http://127.0.0.1:${LLAMA_CPP_EMBED_HOST_PORT:-8081}/v1/models"
 check "Qdrant API" "http://127.0.0.1:${QDRANT_HOST_PORT:-6333}/collections"
 post_check \
     "Ollama embeddings" \
@@ -44,3 +45,7 @@ post_check \
     "llama.cpp chat" \
     "http://127.0.0.1:${LLAMA_CPP_HOST_PORT:-8080}/v1/chat/completions" \
     '{"model":"local","messages":[{"role":"user","content":"Reply OK"}],"max_tokens":4}'
+post_check \
+    "llama.cpp embeddings" \
+    "http://127.0.0.1:${LLAMA_CPP_EMBED_HOST_PORT:-8081}/v1/embeddings" \
+    "{\"model\":\"${EMBEDDING_MODEL:-local}\",\"input\":\"ping\"}"

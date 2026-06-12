@@ -1,16 +1,19 @@
 # Local AI Coding Facility
 
-A Docker Compose deployment for shared, local coding-agent infrastructure. It runs inference, embeddings, and optional curated-document retrieval while letting developers maintain OpenCode-like clients, source code, compilers, tests, and permissions inside each project's own dev container.
+A Docker Compose deployment for shared, local coding-agent infrastructure. It runs inference, embeddings, and optional curated-document retrieval while keeping OpenCode-like clients, source code, compilers, tests, and permissions inside each project's own dev container.
 
 ```mermaid
 flowchart LR
-  P[Project dev containers<br/>OpenCode + tools] -->|host gateway or shared network| O[Ollama<br/>fast model + embeddings]
-  P -->|OpenAI-compatible API| L[llama.cpp<br/>strong GGUF profile]
+  P[Project dev containers<br/>OpenCode + tools] -->|inference| O[Ollama<br/>fast model]
+  P -->|inference with retrieved context| L[llama.cpp<br/>strong GGUF profile]
   P -->|MCP| R[RAG MCP]
-  R --> O
-  R --> Q[Qdrant]
+  R -->|choose embedding backend| OE[Ollama embeddings]
+  R -->|choose embedding backend| GE[llama.cpp<br/>embedding GGUF]
+  R <--> Q[Qdrant]
+  R -.->|retrieved context returned to client| P
   O --> D[(data/ollama)]
   L --> M[(models/*.gguf)]
+  GE --> M
   Q --> V[(data/qdrant)]
 ```
 
@@ -26,7 +29,7 @@ images/                        Thin custom service images
 scripts/                       Stable operator commands
 docs/                          Architecture and operating guidance
 docker-compose.yml             Base Ollama deployment and optional services
-docker-compose.{cpu,nvidia,amd,rag,dev}.yml
+docker-compose.{cpu,nvidia,amd,rag,embeddings-gguf,dev}.yml
 ```
 
 ## Prerequisites
@@ -95,6 +98,29 @@ MCP client to `http://127.0.0.1:8765/mcp`.
 ./scripts/up.sh nvidia rag
 ```
 
+The command above uses Ollama embeddings. To run the full retrieval embedding
+path with an embedding-capable GGUF served by llama.cpp:
+
+```bash
+./scripts/up.sh nvidia rag gguf-embeddings
+```
+
+Use a local model:
+
+```dotenv
+LLAMA_CPP_EMBED_MODEL_PATH=/models/qwen3-embedding-0.6b-q8_0.gguf
+LLAMA_CPP_EMBED_HF_REPO=
+LLAMA_CPP_EMBED_POOLING=last
+```
+
+Or let llama.cpp fetch a Hugging Face GGUF into the persistent HF cache:
+
+```dotenv
+LLAMA_CPP_EMBED_MODEL_PATH=
+LLAMA_CPP_EMBED_HF_REPO=Qwen/Qwen3-Embedding-0.6B-GGUF:Q8_0
+LLAMA_CPP_EMBED_POOLING=last
+```
+
 Available MCP tools:
 
 - `index_project_docs`
@@ -102,8 +128,10 @@ Available MCP tools:
 - `list_collections`
 - `delete_project_index`
 
-The embedding model must be pulled and `EMBEDDING_DIM` must match its output.
-See [docs/architecture.md](docs/architecture.md) for the retrieval boundary.
+The RAG service detects vector size from the embedding response. A collection
+cannot mix dimensions or embedding models; use a new collection or rebuild it
+when changing models. See [docs/embedding-models.md](docs/embedding-models.md)
+and [docs/architecture.md](docs/architecture.md).
 
 ## Endpoints
 
@@ -111,6 +139,7 @@ See [docs/architecture.md](docs/architecture.md) for the retrieval boundary.
 |---|---|---|
 | Ollama | `http://host.docker.internal:11434/v1` | `http://ollama:11434/v1` |
 | llama.cpp | `http://host.docker.internal:8080/v1` | `http://llama-cpp:8080/v1` |
+| llama.cpp embeddings | `http://host.docker.internal:8081/v1` | `http://llama-cpp-embeddings:8080/v1` |
 | Qdrant | `http://host.docker.internal:6333` | `http://qdrant:6333` |
 | RAG MCP | `http://host.docker.internal:8765/mcp` | `http://rag-mcp:8765/mcp` |
 
@@ -179,4 +208,3 @@ docker compose logs ollama
 
 See [docs/troubleshooting.md](docs/troubleshooting.md) for common GPU, model,
 network, and retrieval failures.
-

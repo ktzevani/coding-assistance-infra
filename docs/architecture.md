@@ -5,9 +5,16 @@ access, and optional retrieval. A project dev container owns OpenCode, source,
 toolchains, tests, project instructions, and permissions.
 
 The base Compose file starts Ollama. Runtime-specific override files add CPU,
-NVIDIA, or AMD behavior without duplicating the services. llama.cpp is an
-explicit profile because it cannot start until a GGUF is mounted. RAG is a
-separate override because inference must remain useful when retrieval is down.
+NVIDIA, or AMD behavior without duplicating the services. The coding and
+embedding llama.cpp servers are separate explicit profiles because they load
+different GGUF models with different server modes. RAG is a separate override
+because inference must remain useful when retrieval is down.
+
+RAG does not live inside an inference model. The MCP service embeds documents
+and queries through either Ollama or `llama-cpp-embeddings`, stores and searches
+vectors in Qdrant, then returns relevant text to the project client. OpenCode
+can place that text into a prompt sent to either the Ollama coding model or the
+llama.cpp coding model.
 
 Retrieval follows this order:
 
@@ -21,6 +28,8 @@ The MCP service accepts only project names that resolve beneath `/workspaces`.
 Its default patterns include README, docs, ADRs, architecture notes, AGENTS,
 changelogs, and contribution guides. It does not recursively index source code.
 
+Each Qdrant collection must use one embedding model and vector dimension.
+Changing embedding models requires a new collection or a rebuilt index.
+
 All host ports bind to loopback. Add authentication and transport security
 before adapting this design for remote access.
-

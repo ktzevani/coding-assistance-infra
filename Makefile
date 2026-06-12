@@ -1,4 +1,4 @@
-.PHONY: config up up-nvidia up-amd up-llama up-rag down pull-models smoke endpoints lint
+.PHONY: config up up-nvidia up-amd up-llama up-rag up-rag-gguf down pull-models smoke endpoints lint
 
 config:
 	docker compose -f docker-compose.yml -f docker-compose.cpu.yml config
@@ -18,6 +18,9 @@ up-llama:
 up-rag:
 	./scripts/up.sh cpu rag
 
+up-rag-gguf:
+	./scripts/up.sh cpu rag gguf-embeddings
+
 down:
 	./scripts/down.sh
 
@@ -33,4 +36,3 @@ endpoints:
 lint:
 	shellcheck scripts/*.sh images/*/*.sh
 	python3 -m compileall -q images/rag-mcp/src
-

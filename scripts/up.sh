@@ -13,8 +13,8 @@ add_backend "${backend}"
 for feature in "$@"; do
     add_feature "${feature}"
 done
+finalize_features
 
 printf '%q ' "${compose_files[@]}" "${compose_profiles[@]}" > .local-ai-stack
 printf '\n' >> .local-ai-stack
 compose up -d --build
-

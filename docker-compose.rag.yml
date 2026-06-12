@@ -18,8 +18,12 @@ services:
       QDRANT_URL: http://qdrant:6333
       OLLAMA_URL: http://ollama:11434
       EMBED_MODEL_OLLAMA: ${EMBED_MODEL_OLLAMA:-qwen3-embedding:0.6b}
+      EMBEDDING_BACKEND: ${EMBEDDING_BACKEND:-ollama}
+      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-http://ollama:11434}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-qwen3-embedding:0.6b}
+      EMBEDDING_DOCUMENT_PREFIX: ${EMBEDDING_DOCUMENT_PREFIX:-}
+      EMBEDDING_QUERY_PREFIX: ${EMBEDDING_QUERY_PREFIX:-}
       QDRANT_COLLECTION: ${QDRANT_COLLECTION:-project_memory}
-      EMBEDDING_DIM: ${EMBEDDING_DIM:-1024}
       RAG_TOP_K: ${RAG_TOP_K:-8}
       RAG_MAX_CHUNK_TOKENS: ${RAG_MAX_CHUNK_TOKENS:-600}
       RAG_MAX_CONTEXT_TOKENS: ${RAG_MAX_CONTEXT_TOKENS:-4000}
@@ -34,4 +38,3 @@ services:
       - qdrant
     networks:
       - local-ai
-
