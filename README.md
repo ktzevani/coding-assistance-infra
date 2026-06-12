@@ -1,5 +1,11 @@
 # Local Infrastructure for Coding Assistance
 
+![License](https://img.shields.io/badge/License-MIT-green)
+![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20Linux-4E8CCF)
+![Ollama](https://img.shields.io/badge/Ollama-white?style=flat-square&logo=Ollama&logoColor=black)
+![llama.cpp](https://img.shields.io/badge/Inference-llama.cpp-blue)
+![RAG](https://img.shields.io/badge/RAG-optional-lightgrey)
+
 A Docker Compose deployment for shared, local coding-agent infrastructure. It runs inference, embeddings, and optional curated-document retrieval while keeping OpenCode-like clients, source code, compilers, tests, and permissions inside each project's own dev container.
 
 ```mermaid
@@ -20,7 +26,7 @@ flowchart LR
 All published ports bind to `127.0.0.1`. Nothing is exposed to the LAN by
 default.
 
-## Repository Layout
+## 🗂️ Repository Layout
 
 ```text
 .devcontainer/                 Infrastructure-development container
@@ -33,7 +39,7 @@ docker-compose.yml             Base Ollama deployment and optional services
 docker-compose.{cpu,nvidia,amd,rag,embeddings-gguf,dev}.yml
 ```
 
-## Prerequisites
+## ✅ Prerequisites
 
 - Docker Engine or Docker Desktop with Compose v2
 - `curl` for Bash host-side smoke tests; PowerShell uses `Invoke-WebRequest`
@@ -50,7 +56,7 @@ For NVIDIA, verify the host runtime first:
 GPU access is granted at container runtime by Compose. Dockerfiles only select
 GPU-capable software.
 
-## Quick Start
+## 🚀 Quick Start
 
 The baseline starts Ollama and is CPU-safe:
 
@@ -87,7 +93,7 @@ Use NVIDIA or AMD acceleration:
 Model pulls can be large. Change `FAST_MODEL_OLLAMA` in `.env` to a smaller
 model before `pull-models.sh` when validating on CPU or limited hardware.
 
-## llama.cpp
+## 🦙 llama.cpp
 
 Place a GGUF file in `./models`, set its container path in `.env`, then enable
 the optional service:
@@ -109,7 +115,7 @@ NVIDIA uses `server-cuda` with GPU layers defaulting to `-1` for full offload.
 Context, threads, batching, KV-cache types, parallel slots, and GPU layers are
 all environment-controlled.
 
-## Optional RAG
+## 🔎 Optional RAG
 
 RAG indexes only curated project memory, not source trees by default. Mount
 project directories beneath `./workspaces`, start the stack, then connect an
@@ -179,7 +185,7 @@ cannot mix dimensions or embedding models; use a new collection or rebuild it
 when changing models. See [docs/embedding-models.md](docs/embedding-models.md)
 and [docs/architecture.md](docs/architecture.md).
 
-## Endpoints
+## 🔌 Endpoints
 
 | Service | Host / project dev container | Same Compose network |
 |---|---|---|
@@ -197,14 +203,14 @@ extra_hosts:
   - "host.docker.internal:host-gateway"
 ```
 
-## OpenCode Integration
+## 🧩 OpenCode Integration
 
 OpenCode remains project-local. Start from
 [`config/opencode/provider-snippet.example.jsonc`](config/opencode/provider-snippet.example.jsonc)
 inside each trusted project and review its permissions before use. See
 [docs/opencode-integration.md](docs/opencode-integration.md).
 
-## Model Tuning
+## 🎛️ Model Tuning
 
 The `.env` file is the active v1 profile layer. Example future-compatible YAML
 profiles live under `config/ollama` and `config/llama-cpp`.
@@ -217,14 +223,14 @@ Enable llama.cpp only after choosing a quantization and offload level that fits.
 Higher context consumes substantial KV-cache memory. See
 [docs/model-profiles.md](docs/model-profiles.md).
 
-## Development Container
+## 🛠️ Development Container
 
 Open this repository with VS Code Dev Containers to get Docker CLI, Compose,
 ShellCheck, Python, Ruff, YAML tooling, and the repository mounted at
 `/opt/project`. The Docker socket is mounted so the dev container can manage
 the host Compose stack.
 
-## Operations
+## ⚙️ Operations
 
 ```bash
 ./scripts/linux/down.sh
@@ -249,7 +255,7 @@ the matching `down` wrapper for the stack you started. See
 Persistent state lives under `DATA_ROOT`; GGUF files live under `MODEL_ROOT`.
 Do not commit either.
 
-## Upgrade And Pinning
+## 📌 Upgrade And Pinning
 
 The examples use moving image tags for an easy first run. For repeatable
 deployments, replace image tags in `.env` with tested version tags or digests,
@@ -257,7 +263,7 @@ then validate all Compose variants and smoke tests before upgrading. llama.cpp
 flags can change, so validate `images/llama-cpp/entrypoint.sh` when changing its
 base image.
 
-## Troubleshooting
+## 🩺 Troubleshooting
 
 Start with:
 
