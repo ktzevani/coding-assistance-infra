@@ -1,4 +1,4 @@
-.PHONY: config up up-nvidia up-amd up-llama up-rag up-rag-gguf down pull-models smoke endpoints lint
+.PHONY: config up up-nvidia up-amd up-llama up-rag up-rag-gguf down pull-models smoke endpoints lint test
 
 config:
 	docker compose -f docker-compose.yml -f docker-compose.cpu.yml config
@@ -32,6 +32,9 @@ smoke:
 
 endpoints:
 	./scripts/linux/print-endpoints.sh
+
+test:
+	python3 -m unittest discover -s images/rag-mcp/tests -v
 
 lint:
 	shellcheck scripts/linux/*.sh images/*/*.sh

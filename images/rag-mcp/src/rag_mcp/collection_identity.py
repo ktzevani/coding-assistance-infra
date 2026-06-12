@@ -13,6 +13,10 @@ def identity_payload(backend: str, model: str) -> dict[str, str]:
     }
 
 
+def stale_point_ids(existing_ids: set[str], current_ids: set[str]) -> set[str]:
+    return existing_ids - current_ids
+
+
 def validate_identity(
     collection: str,
     payload: dict[str, Any],

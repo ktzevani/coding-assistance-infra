@@ -162,6 +162,10 @@ Available MCP tools:
 `LLAMA_CPP_EMBED_MODEL_ID` identifies the loaded GGUF in stored vectors and
 search filters. Change it whenever the GGUF model changes.
 
+Re-running `index_project_docs` replaces that project’s index after successfully
+upserting current chunks, then removes stale chunks for deleted or shortened
+files.
+
 Collections store a reserved identity marker and reject indexing or searching
 with a different embedding backend or model identity.
 
@@ -218,6 +222,7 @@ the host Compose stack.
 ./scripts/linux/down.sh
 ./scripts/linux/down.sh --remove-orphans
 make config
+make test
 make lint
 ```
 

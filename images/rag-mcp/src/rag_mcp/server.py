@@ -13,6 +13,7 @@ from qdrant_client import QdrantClient, models
 from rag_mcp.collection_identity import (
     COLLECTION_METADATA_KIND,
     identity_payload,
+    stale_point_ids,
     validate_identity,
 )
 
@@ -116,7 +117,7 @@ def _collection_metadata_id(collection: str) -> str:
     return str(uuid.uuid5(uuid.NAMESPACE_URL, f"local-ai-rag-mcp/{collection}"))
 
 
-def _claim_collection_identity(collection: str, vector_size: int) -> None:
+def _validate_collection_identity(collection: str) -> bool:
     metadata_id = _collection_metadata_id(collection)
     metadata = QDRANT.retrieve(
         collection_name=collection,
@@ -128,7 +129,7 @@ def _claim_collection_identity(collection: str, vector_size: int) -> None:
         validate_identity(
             collection, metadata[0].payload or {}, EMBEDDING_BACKEND, EMBEDDING_MODEL_ID
         )
-        return
+        return True
 
     offset = None
     while True:
@@ -144,7 +145,12 @@ def _claim_collection_identity(collection: str, vector_size: int) -> None:
                 collection, point.payload or {}, EMBEDDING_BACKEND, EMBEDDING_MODEL_ID
             )
         if offset is None:
-            break
+            return False
+
+
+def _claim_collection_identity(collection: str, vector_size: int) -> None:
+    if _validate_collection_identity(collection):
+        return
 
     marker_vector = [0.0] * vector_size
     marker_vector[0] = 1.0
@@ -152,13 +158,37 @@ def _claim_collection_identity(collection: str, vector_size: int) -> None:
         collection_name=collection,
         points=[
             models.PointStruct(
-                id=metadata_id,
+                id=_collection_metadata_id(collection),
                 vector=marker_vector,
                 payload=identity_payload(EMBEDDING_BACKEND, EMBEDDING_MODEL_ID),
             )
         ],
         wait=True,
     )
+
+
+def _project_point_ids(collection: str, project: str) -> set[str]:
+    point_ids: set[str] = set()
+    offset = None
+    while True:
+        points, offset = QDRANT.scroll(
+            collection_name=collection,
+            scroll_filter=models.Filter(
+                must=[
+                    models.FieldCondition(
+                        key="project",
+                        match=models.MatchValue(value=project),
+                    )
+                ]
+            ),
+            offset=offset,
+            limit=256,
+            with_payload=False,
+            with_vectors=False,
+        )
+        point_ids.update(str(point.id) for point in points)
+        if offset is None:
+            return point_ids
 
 
 def _ensure_collection(collection: str, vector_size: int) -> None:
@@ -185,7 +215,7 @@ def _ensure_collection(collection: str, vector_size: int) -> None:
 
 @MCP.tool()
 def index_project_docs(project: str, collection: str = DEFAULT_COLLECTION) -> dict[str, Any]:
-    """Index curated documentation from one mounted project directory."""
+    """Replace one project index with its current curated documentation."""
     root = _project_path(project)
     documents: list[tuple[str, str]] = []
     for path in root.rglob("*"):
@@ -203,8 +233,6 @@ def index_project_docs(project: str, collection: str = DEFAULT_COLLECTION) -> di
         if documents
         else []
     )
-    if vectors:
-        _ensure_collection(collection, len(vectors[0]))
     points = [
         models.PointStruct(
             id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{project}/{name}")),
@@ -219,9 +247,37 @@ def index_project_docs(project: str, collection: str = DEFAULT_COLLECTION) -> di
         )
         for (name, content), vector in zip(documents, vectors, strict=True)
     ]
+
+    if vectors:
+        _ensure_collection(collection, len(vectors[0]))
+    elif not QDRANT.collection_exists(collection):
+        return {
+            "project": project,
+            "collection": collection,
+            "chunks_indexed": 0,
+            "stale_chunks_removed": 0,
+        }
+    else:
+        _validate_collection_identity(collection)
+
+    existing_ids = _project_point_ids(collection, project)
     if points:
         QDRANT.upsert(collection_name=collection, points=points, wait=True)
-    return {"project": project, "collection": collection, "chunks_indexed": len(points)}
+
+    current_ids = {str(point.id) for point in points}
+    stale_ids = stale_point_ids(existing_ids, current_ids)
+    if stale_ids:
+        QDRANT.delete(
+            collection_name=collection,
+            points_selector=models.PointIdsList(points=list(stale_ids)),
+            wait=True,
+        )
+    return {
+        "project": project,
+        "collection": collection,
+        "chunks_indexed": len(points),
+        "stale_chunks_removed": len(stale_ids),
+    }
 
 
 @MCP.tool()
@@ -276,8 +332,10 @@ def list_collections() -> list[str]:
 
 
 @MCP.tool()
-def delete_project_index(project: str, collection: str = DEFAULT_COLLECTION) -> dict[str, str]:
-    """Delete one project's indexed documentation from a collection."""
+def delete_project_index(
+    project: str, collection: str = DEFAULT_COLLECTION
+) -> dict[str, str]:
+    """Delete one project index from a collection."""
     QDRANT.delete(
         collection_name=collection,
         points_selector=models.FilterSelector(

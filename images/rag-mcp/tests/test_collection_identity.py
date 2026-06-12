@@ -4,7 +4,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
 
-from rag_mcp.collection_identity import identity_payload, validate_identity
+from rag_mcp.collection_identity import (
+    identity_payload,
+    stale_point_ids,
+    validate_identity,
+)
 
 
 class CollectionIdentityTests(unittest.TestCase):
@@ -21,6 +25,14 @@ class CollectionIdentityTests(unittest.TestCase):
         payload = identity_payload("ollama", "shared-name")
         with self.assertRaises(ValueError):
             validate_identity("memory", payload, "llama-cpp", "shared-name")
+
+    def test_stale_point_ids_returns_only_removed_ids(self) -> None:
+        self.assertEqual(
+            stale_point_ids({"kept", "removed"}, {"kept", "new"}), {"removed"}
+        )
+
+    def test_stale_point_ids_handles_empty_current_index(self) -> None:
+        self.assertEqual(stale_point_ids({"one", "two"}, set()), {"one", "two"})
 
     def test_payload_without_identity_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "without embedding identity"):

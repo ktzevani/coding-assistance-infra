@@ -317,7 +317,7 @@ workspaces/                            Read-only project mounts for RAG
 - The AMD `/dev/kfd` and `/dev/dri` path is intended for native Linux and
   generally does not work through Docker Desktop on Windows.
 - The RAG MCP implementation is intentionally minimal and currently has focused
-  unit coverage only for collection identity policy.
+  unit coverage for collection identity and stale-point cleanup policies.
 - RAG currently depends on the base Ollama service even when GGUF embeddings
   are selected, because Ollama is always part of the base deployment.
 - `ENABLE_RAG`, `GPU_COUNT`, and `HF_HOME` exist in `.env.example` but are not
@@ -325,7 +325,6 @@ workspaces/                            Read-only project mounts for RAG
   but is not read by the server.
 - `config/rag/collections.example.yaml` is mounted into `rag-mcp`, but the
   server currently hardcodes its include/exclude patterns and does not read it.
-- Re-indexing does not remove stale points for deleted files or removed chunks.
 - The example OpenCode provider uses model IDs `code-fast` and `code-strong`,
   which do not match the default served model IDs.
 - OpenCode MCP configuration for `rag-mcp` is documented conceptually but is
