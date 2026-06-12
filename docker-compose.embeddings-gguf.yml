@@ -3,5 +3,6 @@ services:
     environment:
       EMBEDDING_BACKEND: llama-cpp
       EMBEDDING_BASE_URL: http://llama-cpp-embeddings:8080
-      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-local}
+      EMBEDDING_MODEL: local
+      EMBEDDING_MODEL_ID: ${LLAMA_CPP_EMBED_MODEL_ID:-qwen3-embedding-0.6b-q8_0}
 

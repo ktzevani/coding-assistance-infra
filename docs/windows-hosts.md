@@ -80,6 +80,7 @@ Models mounted into containers must still use Linux container paths in `.env`:
 ```dotenv
 LLAMA_CPP_MODEL_PATH=/models/my-coding-model.gguf
 LLAMA_CPP_EMBED_MODEL_PATH=/models/my-embedding-model.gguf
+LLAMA_CPP_EMBED_MODEL_ID=my-embedding-model
 ```
 
 ## Dev Containers

@@ -19,6 +19,7 @@ EMBEDDING_MODEL = os.getenv(
     "EMBEDDING_MODEL",
     os.getenv("EMBED_MODEL_OLLAMA", "qwen3-embedding:0.6b"),
 )
+EMBEDDING_MODEL_ID = os.getenv("EMBEDDING_MODEL_ID", EMBEDDING_MODEL)
 DOCUMENT_PREFIX = os.getenv("EMBEDDING_DOCUMENT_PREFIX", "")
 QUERY_PREFIX = os.getenv("EMBEDDING_QUERY_PREFIX", "")
 DEFAULT_COLLECTION = os.getenv("QDRANT_COLLECTION", "project_memory")
@@ -121,7 +122,7 @@ def _ensure_collection(collection: str, vector_size: int) -> None:
     if existing_size is not None and existing_size != vector_size:
         raise ValueError(
             f"Collection {collection!r} uses {existing_size}-dimension vectors, "
-            f"but {EMBEDDING_MODEL!r} returned {vector_size}. Use a new collection "
+            f"but {EMBEDDING_MODEL_ID!r} returned {vector_size}. Use a new collection "
             "or delete and rebuild the existing index."
         )
 
@@ -157,7 +158,7 @@ def index_project_docs(project: str, collection: str = DEFAULT_COLLECTION) -> di
                 "path": name,
                 "content": content,
                 "embedding_backend": EMBEDDING_BACKEND,
-                "embedding_model": EMBEDDING_MODEL,
+                "embedding_model": EMBEDDING_MODEL_ID,
             },
         )
         for (name, content), vector in zip(documents, vectors, strict=True)
@@ -182,7 +183,7 @@ def search_project_memory(
         ),
         models.FieldCondition(
             key="embedding_model",
-            match=models.MatchValue(value=EMBEDDING_MODEL),
+            match=models.MatchValue(value=EMBEDDING_MODEL_ID),
         ),
     ]
     if project:

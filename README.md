@@ -138,6 +138,7 @@ Use a local model:
 ```dotenv
 LLAMA_CPP_EMBED_MODEL_PATH=/models/qwen3-embedding-0.6b-q8_0.gguf
 LLAMA_CPP_EMBED_HF_REPO=
+LLAMA_CPP_EMBED_MODEL_ID=qwen3-embedding-0.6b-q8_0
 LLAMA_CPP_EMBED_POOLING=last
 ```
 
@@ -146,6 +147,7 @@ Or let llama.cpp fetch a Hugging Face GGUF into the persistent HF cache:
 ```dotenv
 LLAMA_CPP_EMBED_MODEL_PATH=
 LLAMA_CPP_EMBED_HF_REPO=Qwen/Qwen3-Embedding-0.6B-GGUF:Q8_0
+LLAMA_CPP_EMBED_MODEL_ID=qwen3-embedding-0.6b-q8_0
 LLAMA_CPP_EMBED_POOLING=last
 ```
 
@@ -155,6 +157,9 @@ Available MCP tools:
 - `search_project_memory`
 - `list_collections`
 - `delete_project_index`
+
+`LLAMA_CPP_EMBED_MODEL_ID` identifies the loaded GGUF in stored vectors and
+search filters. Change it whenever the GGUF model changes.
 
 The RAG service detects vector size from the embedding response. A collection
 cannot mix dimensions or embedding models; use a new collection or rebuild it

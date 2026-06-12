@@ -42,6 +42,7 @@ Recommended default:
 ```dotenv
 LLAMA_CPP_EMBED_MODEL_PATH=
 LLAMA_CPP_EMBED_HF_REPO=Qwen/Qwen3-Embedding-0.6B-GGUF:Q8_0
+LLAMA_CPP_EMBED_MODEL_ID=qwen3-embedding-0.6b-q8_0
 LLAMA_CPP_EMBED_POOLING=last
 EMBEDDING_DOCUMENT_PREFIX=
 EMBEDDING_QUERY_PREFIX=
@@ -54,9 +55,10 @@ Then start:
 ./scripts/linux/up.sh nvidia rag gguf-embeddings
 ```
 
-When switching models, change `QDRANT_COLLECTION` or delete and rebuild the old
-index. Vectors from different models are not compatible even when their
-dimensions happen to match.
+When switching models, change `LLAMA_CPP_EMBED_MODEL_ID` and
+`QDRANT_COLLECTION`, or delete and rebuild the old index. Vectors from
+different models are not compatible even when their dimensions happen to
+match.
 
 ## References
 

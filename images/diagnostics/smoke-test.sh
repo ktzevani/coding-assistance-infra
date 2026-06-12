@@ -48,4 +48,4 @@ post_check \
 post_check \
     "llama.cpp embeddings" \
     "${LLAMA_CPP_EMBED_URL:-http://llama-cpp-embeddings:8080}/v1/embeddings" \
-    "{\"model\":\"${EMBEDDING_MODEL:-local}\",\"input\":\"ping\"}"
+    '{"model":"local","input":"ping"}'

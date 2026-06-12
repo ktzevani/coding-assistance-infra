@@ -45,7 +45,7 @@ $embedPort = Get-EnvironmentValue -Name "LLAMA_CPP_EMBED_HOST_PORT" -Default "80
 $qdrantPort = Get-EnvironmentValue -Name "QDRANT_HOST_PORT" -Default "6333"
 $fastModel = Get-EnvironmentValue -Name "FAST_MODEL_OLLAMA" -Default "devstral:24b"
 $ollamaEmbedModel = Get-EnvironmentValue -Name "EMBED_MODEL_OLLAMA" -Default "qwen3-embedding:0.6b"
-$embeddingModel = Get-EnvironmentValue -Name "EMBEDDING_MODEL" -Default "local"
+$embeddingModel = "local"
 
 Test-GetEndpoint "Ollama native API" "http://127.0.0.1:$ollamaPort/api/tags"
 Test-GetEndpoint "Ollama OpenAI API" "http://127.0.0.1:$ollamaPort/v1/models"

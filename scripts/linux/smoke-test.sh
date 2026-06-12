@@ -48,4 +48,4 @@ post_check \
 post_check \
     "llama.cpp embeddings" \
     "http://127.0.0.1:${LLAMA_CPP_EMBED_HOST_PORT:-8081}/v1/embeddings" \
-    "{\"model\":\"${EMBEDDING_MODEL:-local}\",\"input\":\"ping\"}"
+    '{"model":"local","input":"ping"}'

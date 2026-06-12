@@ -26,11 +26,7 @@ Do not move OpenCode or project logic into this central facility by default.
 
 ## Workspace Boundary
 
-This project currently lives under `/opt/project/tmp` while being developed
-inside another workspace. Treat `/opt/project/tmp` as the project root and do
-not edit files outside it for this project.
-
-The user intends to move this directory into its own workspace later.
+This project lives at `/opt/project`. Treat `/opt/project` as the project root.
 
 Do not run validation that could start services, build images, pull models,
 consume the GPU, change host Docker state, or disrupt the containing workspace
@@ -54,18 +50,27 @@ scaffold. The repository contains:
 - Model profile examples and operating documentation.
 - Infrastructure-development dev container.
 
-The implementation has passed non-invasive static checks:
+Static checks performed on 2026-06-12:
 
-- Shell syntax for scripts and entrypoints.
-- Python compilation for the RAG MCP service.
-- JSON, TOML, and YAML parsing.
-- Executable-bit and basic generated-command checks.
-- Bash/PowerShell operator-script parity and documentation checks.
+- Bash syntax passed for scripts and entrypoints.
+- Python source, JSON, TOML, and YAML parsing passed.
+- ShellCheck does not currently pass. It reports sourced-file notices and
+  `SC2154` warnings for arrays initialized in `scripts/linux/common.sh`.
+- The mounted checkout presents Bash scripts and entrypoints as executable, but
+  Git tracks them as `0644` while `core.filemode=false`. A fresh Linux clone may
+  therefore not support the documented `./scripts/linux/...` commands.
 
-Docker is unavailable in the current sandbox. No images have been built, no
-services have been started, and `docker compose config` has not been run.
-PowerShell is also unavailable in the sandbox, so `.ps1` parser/execution
-validation has not been run. Runtime behavior remains unverified.
+Docker CLI and Compose v2.40.3 are available in the current dev container.
+Static `docker compose config` validation was declined during the latest audit
+and has not been run. Generated stack-state files and persistent Ollama/Qdrant
+data show that operator scripts and services have been used previously, but
+current running services, built images, endpoints, GPU behavior, and end-to-end
+runtime behavior were not inspected.
+
+PowerShell is unavailable in the current dev container, so `.ps1`
+parser/execution validation has not been run here. A generated PowerShell
+stack-state file is present, indicating the PowerShell wrapper has been used in
+another environment.
 
 ## Architecture
 
@@ -216,6 +221,7 @@ Recommended 16 GB workstation default:
 ```dotenv
 LLAMA_CPP_EMBED_MODEL_PATH=
 LLAMA_CPP_EMBED_HF_REPO=Qwen/Qwen3-Embedding-0.6B-GGUF:Q8_0
+LLAMA_CPP_EMBED_MODEL_ID=qwen3-embedding-0.6b-q8_0
 LLAMA_CPP_EMBED_POOLING=last
 QDRANT_COLLECTION=project_memory_qwen3
 ```
@@ -297,11 +303,14 @@ workspaces/                            Read-only project mounts for RAG
 
 ## Known Gaps And Risks
 
-- Docker Compose merge/configuration has not been validated in this sandbox.
-- Images have not been built.
-- Endpoint and GPU smoke tests have not been executed.
+- Docker Compose merge/configuration has not been validated in this audit.
+- Current images, services, endpoints, and GPU behavior have not been inspected.
 - PowerShell scripts have not been parser-validated or executed because
-  PowerShell is unavailable in the current sandbox.
+  PowerShell is unavailable in the current dev container.
+- The documented Bash commands rely on executable files, but Git currently
+  tracks host scripts as `0644`.
+- `make lint` currently fails ShellCheck because sourced-file relationships are
+  not declared and `up.sh` arrays initialized by `common.sh` trigger `SC2154`.
 - llama.cpp upstream images and flags use moving tags and should eventually be
   pinned after runtime testing.
 - Ollama, Qdrant, and other official images currently use moving tags.
@@ -312,20 +321,32 @@ workspaces/                            Read-only project mounts for RAG
   tests yet.
 - RAG currently depends on the base Ollama service even when GGUF embeddings
   are selected, because Ollama is always part of the base deployment.
-- `ENABLE_RAG` exists in `.env.example` but feature activation is controlled by
-  the wrapper/Compose override, not this variable.
+- `ENABLE_RAG`, `GPU_COUNT`, and `HF_HOME` exist in `.env.example` but are not
+  used by the implementation. `RAG_MAX_CONTEXT_TOKENS` is passed to `rag-mcp`
+  but is not read by the server.
+- `config/rag/collections.example.yaml` is mounted into `rag-mcp`, but the
+  server currently hardcodes its include/exclude patterns and does not read it.
+- Copying `.env.example` keeps both llama.cpp GPU-layer settings at `0`, so
+  selecting the NVIDIA override does not enable llama.cpp GPU offload unless
+  the operator changes those values.
+- Documentation says a Qdrant collection cannot mix embedding models. The
+  implementation rejects dimension changes and filters searches by backend and
+  model, but permits same-dimension models in one collection.
+- Re-indexing does not remove stale points for deleted files or removed chunks.
+- The example OpenCode provider uses model IDs `code-fast` and `code-strong`,
+  which do not match the default served model IDs.
 - OpenCode MCP configuration for `rag-mcp` is documented conceptually but is
   not included in the provider snippet yet.
 
 ## Next Sensible Work
 
-When the project is in its own Docker-capable workspace and runtime validation
-is approved:
+With explicit approval for Docker/runtime validation:
 
 1. Run `docker compose config` for CPU, NVIDIA, AMD, RAG, and GGUF embedding
    combinations.
-2. Pin tested image versions or digests.
-3. Build and start CPU-safe Ollama first.
+2. Reconcile the documented behavior and unused/misleading configuration listed
+   under Known Gaps And Risks.
+3. Pin tested image versions or digests.
 4. Validate llama.cpp coding and embedding server entrypoint flags against the
    pinned image.
 5. Exercise Ollama and llama.cpp `/v1/embeddings` through `rag-mcp`.
@@ -333,8 +354,7 @@ is approved:
    confinement, curated-file selection, and backend/model filtering.
 7. Add an example OpenCode MCP configuration for `rag-mcp`.
 
-Do not perform these runtime steps in the containing workspace without explicit
-user approval.
+Do not perform runtime steps without explicit user approval.
 
 ## Documentation
 
