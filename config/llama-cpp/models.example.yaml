@@ -1,0 +1,10 @@
+profiles:
+  code-strong:
+    backend: llama-cpp
+    model_path: /models/qwen3.6-35b-a3b.gguf
+    base_url: http://llama-cpp:8080/v1
+    context: 16384
+    n_gpu_layers: -1
+    cache_type_k: q8_0
+    cache_type_v: q8_0
+

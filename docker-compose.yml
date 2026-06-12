@@ -1,0 +1,82 @@
+name: ${COMPOSE_PROJECT_NAME:-local-ai-coding}
+
+services:
+  ollama:
+    image: ${OLLAMA_IMAGE:-ollama/ollama:latest}
+    restart: unless-stopped
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-24h}
+      OLLAMA_NUM_PARALLEL: ${OLLAMA_NUM_PARALLEL:-1}
+      OLLAMA_FLASH_ATTENTION: ${OLLAMA_FLASH_ATTENTION:-1}
+      OLLAMA_CONTEXT_LENGTH: ${OLLAMA_CONTEXT_LENGTH:-8192}
+    volumes:
+      - ${DATA_ROOT:-./data}/ollama:/root/.ollama
+    ports:
+      - "127.0.0.1:${OLLAMA_HOST_PORT:-11434}:11434"
+    networks:
+      - local-ai
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  llama-cpp:
+    profiles: ["llama"]
+    build:
+      context: images/llama-cpp
+      args:
+        LLAMA_CPP_BASE_IMAGE: ${LLAMA_CPP_BASE_IMAGE:-ghcr.io/ggml-org/llama.cpp:server}
+    image: local/llama-cpp-server:latest
+    restart: unless-stopped
+    environment:
+      LLAMA_CPP_MODEL_PATH: ${LLAMA_CPP_MODEL_PATH:-/models/qwen3.6-35b-a3b.gguf}
+      LLAMA_CPP_CTX_SIZE: ${LLAMA_CPP_CTX_SIZE:-16384}
+      LLAMA_CPP_N_GPU_LAYERS: ${LLAMA_CPP_N_GPU_LAYERS:-0}
+      LLAMA_CPP_THREADS: ${LLAMA_CPP_THREADS:-12}
+      LLAMA_CPP_BATCH_SIZE: ${LLAMA_CPP_BATCH_SIZE:-512}
+      LLAMA_CPP_UBATCH_SIZE: ${LLAMA_CPP_UBATCH_SIZE:-128}
+      LLAMA_CPP_CACHE_TYPE_K: ${LLAMA_CPP_CACHE_TYPE_K:-q8_0}
+      LLAMA_CPP_CACHE_TYPE_V: ${LLAMA_CPP_CACHE_TYPE_V:-q8_0}
+      LLAMA_CPP_PARALLEL: ${LLAMA_CPP_PARALLEL:-1}
+      LLAMA_CPP_CONT_BATCHING: ${LLAMA_CPP_CONT_BATCHING:-true}
+    volumes:
+      - ${MODEL_ROOT:-./models}:/models:ro
+    ports:
+      - "127.0.0.1:${LLAMA_CPP_HOST_PORT:-8080}:8080"
+    networks:
+      - local-ai
+
+  model-init:
+    profiles: ["init"]
+    build:
+      context: images/model-init
+    image: local/model-init:latest
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      FAST_MODEL_OLLAMA: ${FAST_MODEL_OLLAMA:-devstral:24b}
+      EMBED_MODEL_OLLAMA: ${EMBED_MODEL_OLLAMA:-qwen3-embedding:0.6b}
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - local-ai
+
+  diagnostics:
+    profiles: ["diagnostics"]
+    build:
+      context: images/diagnostics
+    image: local/local-ai-diagnostics:latest
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      LLAMA_CPP_URL: http://llama-cpp:8080
+      QDRANT_URL: http://qdrant:6333
+      FAST_MODEL_OLLAMA: ${FAST_MODEL_OLLAMA:-devstral:24b}
+      EMBED_MODEL_OLLAMA: ${EMBED_MODEL_OLLAMA:-qwen3-embedding:0.6b}
+    networks:
+      - local-ai
+
+networks:
+  local-ai:
+    name: ${COMPOSE_PROJECT_NAME:-local-ai-coding}-network

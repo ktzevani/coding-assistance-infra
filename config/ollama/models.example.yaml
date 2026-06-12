@@ -1,0 +1,9 @@
+profiles:
+  code-fast:
+    model: devstral:24b
+    context: 8192
+    purpose: Daily coding-agent loop
+  embeddings:
+    model: qwen3-embedding:0.6b
+    purpose: Curated project-document retrieval
+

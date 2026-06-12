@@ -1,0 +1,38 @@
+# Troubleshooting
+
+## Compose Does Not Parse
+
+Run `docker compose version` and `make config`. This project expects Compose v2
+with support for the `gpus` service key in the NVIDIA override.
+
+## Ollama Is Unreachable
+
+Run `docker compose ps` and `docker compose logs ollama`. Confirm the chosen
+host port is free and that requests use `127.0.0.1` from the host or
+`host.docker.internal` from another container.
+
+## NVIDIA Is Not Visible
+
+Run `./scripts/inspect-gpu.sh nvidia`. A failure here is a host driver or NVIDIA
+Container Toolkit problem, not a Dockerfile problem.
+
+## llama.cpp Exits Immediately
+
+Confirm `LLAMA_CPP_MODEL_PATH` is a container path beneath `/models` and its
+host file exists beneath `MODEL_ROOT`. Reduce context, batch size, or GPU layers
+after an out-of-memory failure.
+
+## RAG Indexing Fails
+
+Confirm the project is mounted beneath `WORKSPACE_ROOT`, the embedding model is
+pulled, and `EMBEDDING_DIM` matches the model. Inspect:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.rag.yml logs rag-mcp qdrant
+```
+
+## Project Container Cannot Reach Host
+
+Add `host.docker.internal:host-gateway` to Linux dev containers, or join the
+facility's user-defined network and use service names.
+

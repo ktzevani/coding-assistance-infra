@@ -1,0 +1,12 @@
+services:
+  ollama:
+    image: ${OLLAMA_ROCM_IMAGE:-ollama/ollama:rocm}
+    devices:
+      - /dev/kfd
+      - /dev/dri
+
+  diagnostics:
+    devices:
+      - /dev/kfd
+      - /dev/dri
+

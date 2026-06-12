@@ -1,0 +1,11 @@
+.env
+.local-ai-stack
+data/
+models/*
+!models/.gitkeep
+workspaces/*
+!workspaces/.gitkeep
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.py[cod]

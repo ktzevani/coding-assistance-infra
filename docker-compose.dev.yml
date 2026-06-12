@@ -1,0 +1,16 @@
+services:
+  dev:
+    profiles: ["dev"]
+    build:
+      context: images/dev
+    image: local/local-ai-coding-dev:latest
+    command: sleep infinity
+    working_dir: /opt/project
+    volumes:
+      - .:/opt/project
+      - /var/run/docker.sock:/var/run/docker.sock
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - local-ai
+

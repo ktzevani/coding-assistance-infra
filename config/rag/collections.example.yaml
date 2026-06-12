@@ -1,0 +1,33 @@
+collections:
+  project_memory:
+    description: Curated project documentation and durable engineering memory
+    include:
+      - README*
+      - docs/**
+      - adr/**
+      - architecture/**
+      - AGENTS.md
+      - CHANGELOG*
+      - CONTRIBUTING*
+    exclude:
+      - .git/**
+      - .venv/**
+      - node_modules/**
+      - build/**
+      - dist/**
+      - target/**
+      - .cache/**
+      - __pycache__/**
+      - "*.png"
+      - "*.jpg"
+      - "*.jpeg"
+      - "*.gif"
+      - "*.pdf"
+      - "*.zip"
+      - "*.tar"
+      - "*.gz"
+      - "*.bin"
+      - "*.onnx"
+      - "*.pt"
+      - "*.safetensors"
+

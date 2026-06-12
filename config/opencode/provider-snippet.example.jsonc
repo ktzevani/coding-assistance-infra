@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "ollama/code-fast",
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Local Ollama",
+      "options": {
+        "baseURL": "http://host.docker.internal:11434/v1"
+      },
+      "models": {
+        "code-fast": {
+          "name": "Local fast coding model"
+        }
+      }
+    },
+    "llamacpp": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Local llama.cpp",
+      "options": {
+        "baseURL": "http://host.docker.internal:8080/v1"
+      },
+      "models": {
+        "code-strong": {
+          "name": "Local strong/offload coding model"
+        }
+      }
+    }
+  },
+  "permission": {
+    "bash": "ask",
+    "edit": "ask",
+    "webfetch": "ask",
+    "websearch": "ask"
+  }
+}
+

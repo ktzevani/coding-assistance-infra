@@ -1,0 +1,8 @@
+services:
+  llama-cpp:
+    build:
+      args:
+        LLAMA_CPP_BASE_IMAGE: ${LLAMA_CPP_BASE_IMAGE:-ghcr.io/ggml-org/llama.cpp:server}
+    environment:
+      LLAMA_CPP_N_GPU_LAYERS: ${LLAMA_CPP_N_GPU_LAYERS:-0}
+
