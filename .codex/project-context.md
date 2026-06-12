@@ -52,12 +52,10 @@ scaffold. The repository contains:
 
 Static checks performed on 2026-06-12:
 
-- Bash syntax passed for scripts and entrypoints.
+- Bash syntax and ShellCheck pass for scripts and entrypoints.
 - Python source, JSON, TOML, and YAML parsing passed.
 - Focused collection-identity, stale-point cleanup, collection-pattern, and
   context-budget unit tests pass.
-- ShellCheck does not currently pass. It reports sourced-file notices and
-  `SC2154` warnings for arrays initialized in `scripts/linux/common.sh`.
 - Bash operator scripts and container entrypoints are tracked as executable.
 
 Docker CLI and Compose v2.40.3 are available in the current dev container.
@@ -313,8 +311,6 @@ workspaces/                            Read-only project mounts for RAG
 - Current images, services, endpoints, and GPU behavior have not been inspected.
 - PowerShell scripts have not been parser-validated or executed because
   PowerShell is unavailable in the current dev container.
-- `make lint` currently fails ShellCheck because sourced-file relationships are
-  not declared and `up.sh` arrays initialized by `common.sh` trigger `SC2154`.
 - llama.cpp upstream images and flags use moving tags and should eventually be
   pinned after runtime testing.
 - Ollama, Qdrant, and other official images currently use moving tags.

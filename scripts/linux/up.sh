@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# shellcheck source=scripts/linux/common.sh
 source "$(dirname "$0")/common.sh"
+# Arrays are initialized by common.sh.
+declare -a compose_files compose_profiles
 
 backend="${1:-${GPU_BACKEND:-cpu}}"
 if [[ "${backend}" =~ ^(cpu|nvidia|amd)$ ]]; then

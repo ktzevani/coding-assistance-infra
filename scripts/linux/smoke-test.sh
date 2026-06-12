@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "${ROOT_DIR}"
+# shellcheck disable=SC1091 # Optional operator-provided environment file.
 [[ -f .env ]] && set -a && source .env && set +a
 
 check() {
