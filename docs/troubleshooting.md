@@ -3,7 +3,7 @@
 ## Compose Does Not Parse
 
 Run `docker compose version` and `make config`. This project expects Compose v2
-with support for the `gpus` service key in the NVIDIA override.
+with support for NVIDIA device reservations in the Compose deployment model.
 
 ## Ollama Is Unreachable
 
@@ -26,6 +26,9 @@ host file exists beneath `MODEL_ROOT`. Reduce context, batch size, or GPU layers
 after an out-of-memory failure.
 
 ## RAG Indexing Fails
+
+Confirm `RAG_COLLECTIONS_CONFIG` points to valid YAML whose collection name
+matches `QDRANT_COLLECTION`. Missing collection entries use built-in patterns.
 
 Confirm the project is mounted beneath `WORKSPACE_ROOT` and the selected
 embedding backend is available. For GGUF embeddings, confirm the model path or

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import httpx
+import yaml
 from mcp.server.fastmcp import FastMCP
 from qdrant_client import QdrantClient, models
 
@@ -16,6 +17,7 @@ from rag_mcp.collection_identity import (
     stale_point_ids,
     validate_identity,
 )
+from rag_mcp.policy import collection_patterns, limit_context
 
 MCP = FastMCP("local-ai-project-memory", host="0.0.0.0", port=8765)
 QDRANT = QdrantClient(url=os.getenv("QDRANT_URL", "http://qdrant:6333"))
@@ -32,6 +34,10 @@ QUERY_PREFIX = os.getenv("EMBEDDING_QUERY_PREFIX", "")
 DEFAULT_COLLECTION = os.getenv("QDRANT_COLLECTION", "project_memory")
 TOP_K = int(os.getenv("RAG_TOP_K", "8"))
 MAX_CHUNK_TOKENS = int(os.getenv("RAG_MAX_CHUNK_TOKENS", "600"))
+MAX_CONTEXT_TOKENS = int(os.getenv("RAG_MAX_CONTEXT_TOKENS", "4000"))
+COLLECTIONS_CONFIG = Path(
+    os.getenv("RAG_COLLECTIONS_CONFIG", "/config/rag/collections.example.yaml")
+)
 WORKSPACE_ROOT = Path(os.getenv("WORKSPACE_ROOT", "/workspaces")).resolve()
 
 INCLUDE = (
@@ -67,6 +73,17 @@ EXCLUDE = (
 )
 
 
+def _collection_patterns(collection: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    if not COLLECTIONS_CONFIG.is_file():
+        return INCLUDE, EXCLUDE
+    loaded = yaml.safe_load(COLLECTIONS_CONFIG.read_text(encoding="utf-8")) or {}
+    if not isinstance(loaded, dict):
+        raise ValueError(
+            f"RAG collections config must contain a mapping: {COLLECTIONS_CONFIG}"
+        )
+    return collection_patterns(loaded, collection, INCLUDE, EXCLUDE)
+
+
 def _project_path(project: str) -> Path:
     path = (WORKSPACE_ROOT / project).resolve()
     if path != WORKSPACE_ROOT and WORKSPACE_ROOT not in path.parents:
@@ -76,9 +93,11 @@ def _project_path(project: str) -> Path:
     return path
 
 
-def _is_curated(relative: str) -> bool:
-    return any(fnmatch.fnmatch(relative, rule) for rule in INCLUDE) and not any(
-        fnmatch.fnmatch(relative, rule) for rule in EXCLUDE
+def _is_curated(
+    relative: str, include: tuple[str, ...], exclude: tuple[str, ...]
+) -> bool:
+    return any(fnmatch.fnmatch(relative, rule) for rule in include) and not any(
+        fnmatch.fnmatch(relative, rule) for rule in exclude
     )
 
 
@@ -218,9 +237,10 @@ def index_project_docs(project: str, collection: str = DEFAULT_COLLECTION) -> di
     """Replace one project index with its current curated documentation."""
     root = _project_path(project)
     documents: list[tuple[str, str]] = []
+    include, exclude = _collection_patterns(collection)
     for path in root.rglob("*"):
         relative = path.relative_to(root).as_posix()
-        if path.is_file() and _is_curated(relative):
+        if path.is_file() and _is_curated(relative, include, exclude):
             try:
                 for index, chunk in enumerate(_chunks(path.read_text(encoding="utf-8"))):
                     if chunk.strip():
@@ -319,10 +339,11 @@ def search_project_memory(
         limit=top_k,
         with_payload=True,
     )
-    return [
+    results = [
         {"score": point.score, **(point.payload or {})}
         for point in result.points
     ]
+    return limit_context(results, MAX_CONTEXT_TOKENS)
 
 
 @MCP.tool()

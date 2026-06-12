@@ -54,7 +54,8 @@ Static checks performed on 2026-06-12:
 
 - Bash syntax passed for scripts and entrypoints.
 - Python source, JSON, TOML, and YAML parsing passed.
-- Focused collection-identity unit tests pass.
+- Focused collection-identity, stale-point cleanup, collection-pattern, and
+  context-budget unit tests pass.
 - ShellCheck does not currently pass. It reports sourced-file notices and
   `SC2154` warnings for arrays initialized in `scripts/linux/common.sh`.
 - Bash operator scripts and container entrypoints are tracked as executable.
@@ -102,7 +103,8 @@ Primary entrypoint:
 Overrides:
 
 - `docker-compose.cpu.yml`: CPU llama.cpp settings.
-- `docker-compose.nvidia.yml`: NVIDIA GPU access and CUDA llama.cpp image.
+- `docker-compose.nvidia.yml`: configurable NVIDIA GPU reservations and CUDA
+  llama.cpp image.
 - `docker-compose.amd.yml`: Ollama ROCm image and AMD device exposure.
 - `docker-compose.rag.yml`: Qdrant and `rag-mcp`.
 - `docker-compose.embeddings-gguf.yml`: points RAG at llama.cpp embeddings.
@@ -189,6 +191,9 @@ Windows PowerShell equivalents:
 - Endpoint: `http://127.0.0.1:8765/mcp`
 - Implementation: `images/rag-mcp/src/rag_mcp/server.py`
 - Embedding backends: `ollama` or `llama-cpp`.
+- Collection-specific include/exclude patterns load from YAML with built-in
+  fallbacks.
+- Search results respect an approximate total context-token budget.
 - Qdrant collection vector size is detected from the embedding response.
 - Stored points include embedding backend and model identity.
 - Each collection stores a reserved identity marker and rejects a different
@@ -317,14 +322,10 @@ workspaces/                            Read-only project mounts for RAG
 - The AMD `/dev/kfd` and `/dev/dri` path is intended for native Linux and
   generally does not work through Docker Desktop on Windows.
 - The RAG MCP implementation is intentionally minimal and currently has focused
-  unit coverage for collection identity and stale-point cleanup policies.
+  unit coverage for collection identity, stale-point cleanup, collection-pattern,
+  and context-budget policies.
 - RAG currently depends on the base Ollama service even when GGUF embeddings
   are selected, because Ollama is always part of the base deployment.
-- `ENABLE_RAG`, `GPU_COUNT`, and `HF_HOME` exist in `.env.example` but are not
-  used by the implementation. `RAG_MAX_CONTEXT_TOKENS` is passed to `rag-mcp`
-  but is not read by the server.
-- `config/rag/collections.example.yaml` is mounted into `rag-mcp`, but the
-  server currently hardcodes its include/exclude patterns and does not read it.
 - The example OpenCode provider uses model IDs `code-fast` and `code-strong`,
   which do not match the default served model IDs.
 - OpenCode MCP configuration for `rag-mcp` is documented conceptually but is
@@ -336,7 +337,7 @@ With explicit approval for Docker/runtime validation:
 
 1. Run `docker compose config` for CPU, NVIDIA, AMD, RAG, and GGUF embedding
    combinations.
-2. Reconcile the documented behavior and unused/misleading configuration listed
+2. Reconcile the remaining documented behavior and configuration gaps listed
    under Known Gaps And Risks.
 3. Pin tested image versions or digests.
 4. Validate llama.cpp coding and embedding server entrypoint flags against the

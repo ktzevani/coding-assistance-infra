@@ -123,6 +123,11 @@ MCP client to `http://127.0.0.1:8765/mcp`.
 .\scripts\windows\up.ps1 nvidia rag
 ```
 
+Index include/exclude patterns are selected by collection name from
+`config/rag/collections.example.yaml`. `RAG_MAX_CONTEXT_TOKENS` limits returned
+search content using the same approximate four-characters-per-token policy used
+for chunking.
+
 The command above uses Ollama embeddings. To run the full retrieval embedding
 path with an embedding-capable GGUF served by llama.cpp:
 
@@ -203,6 +208,9 @@ inside each trusted project and review its permissions before use. See
 
 The `.env` file is the active v1 profile layer. Example future-compatible YAML
 profiles live under `config/ollama` and `config/llama-cpp`.
+
+Set `GPU_COUNT` to `all` or a positive integer to control how many NVIDIA
+devices each accelerated service reserves.
 
 For a 16 GB GPU, begin with an 8k Ollama context and one request at a time.
 Enable llama.cpp only after choosing a quantization and offload level that fits.

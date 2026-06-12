@@ -1,3 +1,5 @@
+# Collection names must match QDRANT_COLLECTION or the collection tool argument.
+# Missing collection entries fall back to the server built-in curated patterns.
 collections:
   project_memory:
     description: Curated project documentation and durable engineering memory

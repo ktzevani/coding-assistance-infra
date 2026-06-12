@@ -25,8 +25,13 @@ Retrieval follows this order:
 5. A future symbol or dependency graph, if justified.
 
 The MCP service accepts only project names that resolve beneath `/workspaces`.
-Its default patterns include README, docs, ADRs, architecture notes, AGENTS,
-changelogs, and contribution guides. It does not recursively index source code.
+Its collection-specific patterns are loaded from the configured RAG collections
+YAML, falling back to built-in defaults for README, docs, ADRs, architecture
+notes, AGENTS, changelogs, and contribution guides. It does not recursively
+index source code.
+
+Search retrieval applies `RAG_MAX_CONTEXT_TOKENS` as an approximate total
+content budget, truncating the final result when necessary.
 
 Each Qdrant collection stores a reserved identity marker and permits only one
 embedding backend, model identity, and vector dimension. Changing embedding
