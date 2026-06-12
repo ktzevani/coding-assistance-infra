@@ -56,9 +56,7 @@ Static checks performed on 2026-06-12:
 - Python source, JSON, TOML, and YAML parsing passed.
 - ShellCheck does not currently pass. It reports sourced-file notices and
   `SC2154` warnings for arrays initialized in `scripts/linux/common.sh`.
-- The mounted checkout presents Bash scripts and entrypoints as executable, but
-  Git tracks them as `0644` while `core.filemode=false`. A fresh Linux clone may
-  therefore not support the documented `./scripts/linux/...` commands.
+- Bash operator scripts and container entrypoints are tracked as executable.
 
 Docker CLI and Compose v2.40.3 are available in the current dev container.
 Static `docker compose config` validation was declined during the latest audit
@@ -307,8 +305,6 @@ workspaces/                            Read-only project mounts for RAG
 - Current images, services, endpoints, and GPU behavior have not been inspected.
 - PowerShell scripts have not been parser-validated or executed because
   PowerShell is unavailable in the current dev container.
-- The documented Bash commands rely on executable files, but Git currently
-  tracks host scripts as `0644`.
 - `make lint` currently fails ShellCheck because sourced-file relationships are
   not declared and `up.sh` arrays initialized by `common.sh` trigger `SC2154`.
 - llama.cpp upstream images and flags use moving tags and should eventually be
