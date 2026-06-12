@@ -51,7 +51,7 @@ QDRANT_COLLECTION=project_memory_qwen3
 Then start:
 
 ```bash
-./scripts/up.sh nvidia rag gguf-embeddings
+./scripts/linux/up.sh nvidia rag gguf-embeddings
 ```
 
 When switching models, change `QDRANT_COLLECTION` or delete and rebuild the old

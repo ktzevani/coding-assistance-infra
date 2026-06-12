@@ -1,6 +1,9 @@
 # Local AI Coding Facility
 
-A Docker Compose deployment for shared, local coding-agent infrastructure. It runs inference, embeddings, and optional curated-document retrieval while keeping OpenCode-like clients, source code, compilers, tests, and permissions inside each project's own dev container.
+A Docker Compose deployment for shared, local coding-agent infrastructure.
+It runs inference, embeddings, and optional curated-document retrieval while
+keeping OpenCode, source code, compilers, tests, and permissions inside each
+project's own dev container.
 
 ```mermaid
 flowchart LR
@@ -26,7 +29,8 @@ default.
 .devcontainer/                 Infrastructure-development container
 config/                        Model, RAG, and OpenCode examples
 images/                        Thin custom service images
-scripts/                       Stable operator commands
+scripts/linux/                 Linux/macOS Bash operator commands
+scripts/windows/               Windows PowerShell operator commands
 docs/                          Architecture and operating guidance
 docker-compose.yml             Base Ollama deployment and optional services
 docker-compose.{cpu,nvidia,amd,rag,embeddings-gguf,dev}.yml
@@ -35,7 +39,7 @@ docker-compose.{cpu,nvidia,amd,rag,embeddings-gguf,dev}.yml
 ## Prerequisites
 
 - Docker Engine or Docker Desktop with Compose v2
-- `curl` for host-side smoke tests
+- `curl` for Bash host-side smoke tests; PowerShell uses `Invoke-WebRequest`
 - Enough disk space for selected models
 - NVIDIA Container Toolkit for NVIDIA mode
 - `/dev/kfd` and `/dev/dri` access for AMD mode
@@ -43,7 +47,7 @@ docker-compose.{cpu,nvidia,amd,rag,embeddings-gguf,dev}.yml
 For NVIDIA, verify the host runtime first:
 
 ```bash
-./scripts/inspect-gpu.sh nvidia
+./scripts/linux/inspect-gpu.sh nvidia
 ```
 
 GPU access is granted at container runtime by Compose. Dockerfiles only select
@@ -55,17 +59,32 @@ The baseline starts Ollama and is CPU-safe:
 
 ```bash
 cp .env.example .env
-./scripts/up.sh cpu
-./scripts/pull-models.sh
-./scripts/smoke-test.sh
-./scripts/print-endpoints.sh
+./scripts/linux/up.sh cpu
+./scripts/linux/pull-models.sh
+./scripts/linux/smoke-test.sh
+./scripts/linux/print-endpoints.sh
+```
+
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+.\scripts\windows\up.ps1 cpu
+.\scripts\windows\pull-models.ps1
+.\scripts\windows\smoke-test.ps1
+.\scripts\windows\print-endpoints.ps1
 ```
 
 Use NVIDIA or AMD acceleration:
 
 ```bash
-./scripts/up.sh nvidia
-./scripts/up.sh amd
+./scripts/linux/up.sh nvidia
+./scripts/linux/up.sh amd
+```
+
+```powershell
+.\scripts\windows\up.ps1 nvidia
+.\scripts\windows\up.ps1 amd
 ```
 
 Model pulls can be large. Change `FAST_MODEL_OLLAMA` in `.env` to a smaller
@@ -81,7 +100,11 @@ LLAMA_CPP_MODEL_PATH=/models/my-coding-model.gguf
 ```
 
 ```bash
-./scripts/up.sh nvidia llama
+./scripts/linux/up.sh nvidia llama
+```
+
+```powershell
+.\scripts\windows\up.ps1 nvidia llama
 ```
 
 The CPU profile uses the official `server` image and NVIDIA uses
@@ -95,14 +118,22 @@ project directories beneath `./workspaces`, start the stack, then connect an
 MCP client to `http://127.0.0.1:8765/mcp`.
 
 ```bash
-./scripts/up.sh nvidia rag
+./scripts/linux/up.sh nvidia rag
+```
+
+```powershell
+.\scripts\windows\up.ps1 nvidia rag
 ```
 
 The command above uses Ollama embeddings. To run the full retrieval embedding
 path with an embedding-capable GGUF served by llama.cpp:
 
 ```bash
-./scripts/up.sh nvidia rag gguf-embeddings
+./scripts/linux/up.sh nvidia rag gguf-embeddings
+```
+
+```powershell
+.\scripts\windows\up.ps1 nvidia rag gguf-embeddings
 ```
 
 Use a local model:
@@ -178,11 +209,23 @@ the host Compose stack.
 ## Operations
 
 ```bash
-./scripts/down.sh
-./scripts/down.sh --remove-orphans
+./scripts/linux/down.sh
+./scripts/linux/down.sh --remove-orphans
 make config
 make lint
 ```
+
+Windows PowerShell equivalents:
+
+```powershell
+.\scripts\windows\down.ps1
+.\scripts\windows\down.ps1 --remove-orphans
+.\scripts\windows\inspect-gpu.ps1 nvidia
+```
+
+The Bash and PowerShell `up` wrappers keep separate stack-state files, so use
+the matching `down` wrapper for the stack you started. See
+[docs/windows-hosts.md](docs/windows-hosts.md) for Windows host details.
 
 Persistent state lives under `DATA_ROOT`; GGUF files live under `MODEL_ROOT`.
 Do not commit either.
@@ -202,8 +245,8 @@ Start with:
 ```bash
 docker compose ps
 docker compose logs ollama
-./scripts/inspect-gpu.sh nvidia
-./scripts/smoke-test.sh
+./scripts/linux/inspect-gpu.sh nvidia
+./scripts/linux/smoke-test.sh
 ```
 
 See [docs/troubleshooting.md](docs/troubleshooting.md) for common GPU, model,

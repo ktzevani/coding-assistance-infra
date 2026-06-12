@@ -1,5 +1,6 @@
 .env
 .local-ai-stack
+.local-ai-stack.ps.json
 data/
 models/*
 !models/.gitkeep

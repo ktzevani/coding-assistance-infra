@@ -4,35 +4,35 @@ config:
 	docker compose -f docker-compose.yml -f docker-compose.cpu.yml config
 
 up:
-	./scripts/up.sh cpu
+	./scripts/linux/up.sh cpu
 
 up-nvidia:
-	./scripts/up.sh nvidia
+	./scripts/linux/up.sh nvidia
 
 up-amd:
-	./scripts/up.sh amd
+	./scripts/linux/up.sh amd
 
 up-llama:
-	./scripts/up.sh cpu llama
+	./scripts/linux/up.sh cpu llama
 
 up-rag:
-	./scripts/up.sh cpu rag
+	./scripts/linux/up.sh cpu rag
 
 up-rag-gguf:
-	./scripts/up.sh cpu rag gguf-embeddings
+	./scripts/linux/up.sh cpu rag gguf-embeddings
 
 down:
-	./scripts/down.sh
+	./scripts/linux/down.sh
 
 pull-models:
-	./scripts/pull-models.sh
+	./scripts/linux/pull-models.sh
 
 smoke:
-	./scripts/smoke-test.sh
+	./scripts/linux/smoke-test.sh
 
 endpoints:
-	./scripts/print-endpoints.sh
+	./scripts/linux/print-endpoints.sh
 
 lint:
-	shellcheck scripts/*.sh images/*/*.sh
+	shellcheck scripts/linux/*.sh images/*/*.sh
 	python3 -m compileall -q images/rag-mcp/src

@@ -5,8 +5,15 @@
 Install a compatible host driver and NVIDIA Container Toolkit, then verify:
 
 ```bash
-./scripts/inspect-gpu.sh nvidia
-./scripts/up.sh nvidia
+./scripts/linux/inspect-gpu.sh nvidia
+./scripts/linux/up.sh nvidia
+```
+
+On a Windows Docker Desktop/WSL 2 host:
+
+```powershell
+.\scripts\windows\inspect-gpu.ps1 nvidia
+.\scripts\windows\up.ps1 nvidia
 ```
 
 The override requests GPUs with Compose `gpus: all` and selects the official
@@ -20,7 +27,8 @@ is practical, but it still competes with coding models for VRAM.
 The AMD override selects `ollama/ollama:rocm` and exposes `/dev/kfd` and
 `/dev/dri`. llama.cpp ROCm is intentionally not supplied in v1. Host groups,
 kernel drivers, and supported GPU generations vary; validate them before model
-tuning.
+tuning. This device path is intended for native Linux hosts and generally is
+not available through Docker Desktop on Windows.
 
 ## CPU
 

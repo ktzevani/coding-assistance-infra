@@ -13,8 +13,11 @@ host port is free and that requests use `127.0.0.1` from the host or
 
 ## NVIDIA Is Not Visible
 
-Run `./scripts/inspect-gpu.sh nvidia`. A failure here is a host driver or NVIDIA
+Run `./scripts/linux/inspect-gpu.sh nvidia`. A failure here is a host driver or NVIDIA
 Container Toolkit problem, not a Dockerfile problem.
+
+On Windows, run `.\scripts\windows\inspect-gpu.ps1 nvidia` and confirm Docker Desktop
+is using the WSL 2 backend with a compatible NVIDIA Windows driver.
 
 ## llama.cpp Exits Immediately
 
@@ -39,3 +42,6 @@ new `QDRANT_COLLECTION` or rebuild the existing collection.
 
 Add `host.docker.internal:host-gateway` to Linux dev containers, or join the
 facility's user-defined network and use service names.
+
+Docker Desktop project containers can normally use `host.docker.internal`
+without an additional host-gateway declaration.
