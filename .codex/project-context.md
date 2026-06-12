@@ -54,6 +54,7 @@ Static checks performed on 2026-06-12:
 
 - Bash syntax passed for scripts and entrypoints.
 - Python source, JSON, TOML, and YAML parsing passed.
+- Focused collection-identity unit tests pass.
 - ShellCheck does not currently pass. It reports sourced-file notices and
   `SC2154` warnings for arrays initialized in `scripts/linux/common.sh`.
 - Bash operator scripts and container entrypoints are tracked as executable.
@@ -190,6 +191,8 @@ Windows PowerShell equivalents:
 - Embedding backends: `ollama` or `llama-cpp`.
 - Qdrant collection vector size is detected from the embedding response.
 - Stored points include embedding backend and model identity.
+- Each collection stores a reserved identity marker and rejects a different
+  backend or model identity.
 - Searches filter by backend and model to avoid mixing incompatible vectors.
 - A collection rejects a changed vector dimension with a clear error.
 
@@ -313,8 +316,8 @@ workspaces/                            Read-only project mounts for RAG
 - AMD support only covers Ollama ROCm; llama.cpp ROCm is not implemented.
 - The AMD `/dev/kfd` and `/dev/dri` path is intended for native Linux and
   generally does not work through Docker Desktop on Windows.
-- The RAG MCP implementation is intentionally minimal and has no automated
-  tests yet.
+- The RAG MCP implementation is intentionally minimal and currently has focused
+  unit coverage only for collection identity policy.
 - RAG currently depends on the base Ollama service even when GGUF embeddings
   are selected, because Ollama is always part of the base deployment.
 - `ENABLE_RAG`, `GPU_COUNT`, and `HF_HOME` exist in `.env.example` but are not
@@ -322,9 +325,6 @@ workspaces/                            Read-only project mounts for RAG
   but is not read by the server.
 - `config/rag/collections.example.yaml` is mounted into `rag-mcp`, but the
   server currently hardcodes its include/exclude patterns and does not read it.
-- Documentation says a Qdrant collection cannot mix embedding models. The
-  implementation rejects dimension changes and filters searches by backend and
-  model, but permits same-dimension models in one collection.
 - Re-indexing does not remove stale points for deleted files or removed chunks.
 - The example OpenCode provider uses model IDs `code-fast` and `code-strong`,
   which do not match the default served model IDs.

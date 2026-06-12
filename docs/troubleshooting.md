@@ -35,8 +35,9 @@ Hugging Face repository, pooling mode, and `gguf-embeddings` feature. Inspect:
 docker compose -f docker-compose.yml -f docker-compose.rag.yml logs rag-mcp qdrant
 ```
 
-If Qdrant reports a dimension mismatch after changing embedding models, use a
-new `QDRANT_COLLECTION` or rebuild the existing collection.
+If Qdrant reports a dimension or collection-identity mismatch after changing
+embedding models, use a new `QDRANT_COLLECTION` or delete and rebuild the
+existing collection.
 
 ## Project Container Cannot Reach Host
 

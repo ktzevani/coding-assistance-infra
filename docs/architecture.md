@@ -28,8 +28,9 @@ The MCP service accepts only project names that resolve beneath `/workspaces`.
 Its default patterns include README, docs, ADRs, architecture notes, AGENTS,
 changelogs, and contribution guides. It does not recursively index source code.
 
-Each Qdrant collection must use one embedding model and vector dimension.
-Changing embedding models requires a new collection or a rebuilt index.
+Each Qdrant collection stores a reserved identity marker and permits only one
+embedding backend, model identity, and vector dimension. Changing embedding
+models requires a new collection or a rebuilt index.
 
 All host ports bind to loopback. Add authentication and transport security
 before adapting this design for remote access.

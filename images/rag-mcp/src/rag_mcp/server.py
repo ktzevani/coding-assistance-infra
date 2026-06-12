@@ -10,6 +10,12 @@ import httpx
 from mcp.server.fastmcp import FastMCP
 from qdrant_client import QdrantClient, models
 
+from rag_mcp.collection_identity import (
+    COLLECTION_METADATA_KIND,
+    identity_payload,
+    validate_identity,
+)
+
 MCP = FastMCP("local-ai-project-memory", host="0.0.0.0", port=8765)
 QDRANT = QdrantClient(url=os.getenv("QDRANT_URL", "http://qdrant:6333"))
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
@@ -106,6 +112,55 @@ def _embed(texts: list[str], prefix: str) -> list[list[float]]:
     ]
 
 
+def _collection_metadata_id(collection: str) -> str:
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"local-ai-rag-mcp/{collection}"))
+
+
+def _claim_collection_identity(collection: str, vector_size: int) -> None:
+    metadata_id = _collection_metadata_id(collection)
+    metadata = QDRANT.retrieve(
+        collection_name=collection,
+        ids=[metadata_id],
+        with_payload=True,
+        with_vectors=False,
+    )
+    if metadata:
+        validate_identity(
+            collection, metadata[0].payload or {}, EMBEDDING_BACKEND, EMBEDDING_MODEL_ID
+        )
+        return
+
+    offset = None
+    while True:
+        points, offset = QDRANT.scroll(
+            collection_name=collection,
+            offset=offset,
+            limit=256,
+            with_payload=True,
+            with_vectors=False,
+        )
+        for point in points:
+            validate_identity(
+                collection, point.payload or {}, EMBEDDING_BACKEND, EMBEDDING_MODEL_ID
+            )
+        if offset is None:
+            break
+
+    marker_vector = [0.0] * vector_size
+    marker_vector[0] = 1.0
+    QDRANT.upsert(
+        collection_name=collection,
+        points=[
+            models.PointStruct(
+                id=metadata_id,
+                vector=marker_vector,
+                payload=identity_payload(EMBEDDING_BACKEND, EMBEDDING_MODEL_ID),
+            )
+        ],
+        wait=True,
+    )
+
+
 def _ensure_collection(collection: str, vector_size: int) -> None:
     if not QDRANT.collection_exists(collection):
         QDRANT.create_collection(
@@ -115,16 +170,17 @@ def _ensure_collection(collection: str, vector_size: int) -> None:
                 distance=models.Distance.COSINE,
             ),
         )
-        return
+    else:
+        config = QDRANT.get_collection(collection).config.params.vectors
+        existing_size = config.size if isinstance(config, models.VectorParams) else None
+        if existing_size is not None and existing_size != vector_size:
+            raise ValueError(
+                f"Collection {collection!r} uses {existing_size}-dimension vectors, "
+                f"but {EMBEDDING_MODEL_ID!r} returned {vector_size}. Use a new collection "
+                "or delete and rebuild the existing index."
+            )
 
-    config = QDRANT.get_collection(collection).config.params.vectors
-    existing_size = config.size if isinstance(config, models.VectorParams) else None
-    if existing_size is not None and existing_size != vector_size:
-        raise ValueError(
-            f"Collection {collection!r} uses {existing_size}-dimension vectors, "
-            f"but {EMBEDDING_MODEL_ID!r} returned {vector_size}. Use a new collection "
-            "or delete and rebuild the existing index."
-        )
+    _claim_collection_identity(collection, vector_size)
 
 
 @MCP.tool()
@@ -195,7 +251,15 @@ def search_project_memory(
     result = QDRANT.query_points(
         collection_name=collection,
         query=query_vector,
-        query_filter=models.Filter(must=conditions),
+        query_filter=models.Filter(
+            must=conditions,
+            must_not=[
+                models.FieldCondition(
+                    key="record_kind",
+                    match=models.MatchValue(value=COLLECTION_METADATA_KIND),
+                )
+            ],
+        ),
         limit=top_k,
         with_payload=True,
     )

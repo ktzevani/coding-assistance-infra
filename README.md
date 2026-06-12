@@ -162,6 +162,9 @@ Available MCP tools:
 `LLAMA_CPP_EMBED_MODEL_ID` identifies the loaded GGUF in stored vectors and
 search filters. Change it whenever the GGUF model changes.
 
+Collections store a reserved identity marker and reject indexing or searching
+with a different embedding backend or model identity.
+
 The RAG service detects vector size from the embedding response. A collection
 cannot mix dimensions or embedding models; use a new collection or rebuild it
 when changing models. See [docs/embedding-models.md](docs/embedding-models.md)
