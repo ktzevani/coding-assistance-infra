@@ -326,8 +326,6 @@ workspaces/                            Read-only project mounts for RAG
   and context-budget policies.
 - RAG currently depends on the base Ollama service even when GGUF embeddings
   are selected, because Ollama is always part of the base deployment.
-- The example OpenCode provider uses model IDs `code-fast` and `code-strong`,
-  which do not match the default served model IDs.
 - OpenCode MCP configuration for `rag-mcp` is documented conceptually but is
   not included in the provider snippet yet.
 
