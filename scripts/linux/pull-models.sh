@@ -4,5 +4,6 @@ set -euo pipefail
 source "$(dirname "$0")/common.sh"
 
 compose_profiles+=(--profile init)
-compose run --rm model-init
+echo "GGUF models will be stored beneath MODEL_ROOT (default: ${ROOT_DIR}/models)."
+compose run --rm --build model-init
 

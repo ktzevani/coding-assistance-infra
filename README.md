@@ -90,16 +90,31 @@ Use NVIDIA or AMD acceleration:
 .\scripts\windows\up.ps1 amd
 ```
 
-Model pulls can be large. Change `FAST_MODEL_OLLAMA` in `.env` to a smaller
-model before `pull-models.sh` when validating on CPU or limited hardware.
+`pull-models` prepares all default model assets: both Ollama models, the
+llama.cpp coding GGUF, and the llama.cpp embedding GGUF. Existing GGUF files
+are skipped and interrupted downloads resume from `.part` files. The wrapper
+rebuilds its small download image before running, so changes to its pull logic
+take effect immediately.
+
+Ollama models are stored beneath `DATA_ROOT/ollama`. GGUF files are stored
+beneath `MODEL_ROOT`; with the example `.env`, that is `./models` in this
+repository. Download progress shows `/models/...` because that is the
+corresponding path inside the download container.
+
+Model pulls can be large. The default coding GGUF is approximately 15.4 GB.
+Change the model source settings in `.env` before `pull-models.sh` when
+validating on limited disk, memory, or network capacity.
 
 ## 🦙 llama.cpp
 
-Place a GGUF file in `./models`, set its container path in `.env`, then enable
-the optional service:
+The default pull configuration downloads Unsloth Qwen3.6 35B A3B UD-Q3_K_S
+into `./models`. Override the path and Hugging Face repo/file settings in `.env`
+to select another coding GGUF, then enable the optional service:
 
 ```dotenv
-LLAMA_CPP_MODEL_PATH=/models/my-coding-model.gguf
+LLAMA_CPP_MODEL_PATH=/models/Qwen3.6-35B-A3B-UD-Q3_K_S.gguf
+LLAMA_CPP_MODEL_HF_REPO=unsloth/Qwen3.6-35B-A3B-GGUF
+LLAMA_CPP_MODEL_HF_FILE=Qwen3.6-35B-A3B-UD-Q3_K_S.gguf
 ```
 
 ```bash
@@ -148,13 +163,18 @@ path with an embedding-capable GGUF served by llama.cpp:
 Use a local model:
 
 ```dotenv
-LLAMA_CPP_EMBED_MODEL_PATH=/models/qwen3-embedding-0.6b-q8_0.gguf
+LLAMA_CPP_EMBED_MODEL_PATH=/models/Qwen3-Embedding-0.6B-Q8_0.gguf
+LLAMA_CPP_EMBED_MODEL_HF_REPO=Qwen/Qwen3-Embedding-0.6B-GGUF
+LLAMA_CPP_EMBED_MODEL_HF_FILE=Qwen3-Embedding-0.6B-Q8_0.gguf
 LLAMA_CPP_EMBED_HF_REPO=
 LLAMA_CPP_EMBED_MODEL_ID=qwen3-embedding-0.6b-q8_0
 LLAMA_CPP_EMBED_POOLING=last
 ```
 
-Or let llama.cpp fetch a Hugging Face GGUF into the persistent HF cache:
+To manage either GGUF outside `pull-models`, leave its `*_HF_REPO` or
+`*_HF_FILE` setting empty and place the file at the configured model path.
+
+Or let llama.cpp fetch a Hugging Face GGUF on service startup into the persistent llama.cpp cache:
 
 ```dotenv
 LLAMA_CPP_EMBED_MODEL_PATH=

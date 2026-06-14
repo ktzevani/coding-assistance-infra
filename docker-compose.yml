@@ -31,7 +31,7 @@ services:
     image: ${COMPOSE_PROJECT_NAME:-coding-assistance-infra}/llama-cpp-server:latest
     restart: unless-stopped
     environment:
-      LLAMA_CPP_MODEL_PATH: ${LLAMA_CPP_MODEL_PATH:-/models/qwen3.6-35b-a3b.gguf}
+      LLAMA_CPP_MODEL_PATH: ${LLAMA_CPP_MODEL_PATH:-/models/Qwen3.6-35B-A3B-UD-Q3_K_S.gguf}
       LLAMA_CPP_CTX_SIZE: ${LLAMA_CPP_CTX_SIZE:-16384}
       LLAMA_CPP_N_GPU_LAYERS: ${LLAMA_CPP_N_GPU_LAYERS:-0}
       LLAMA_CPP_THREADS: ${LLAMA_CPP_THREADS:-12}
@@ -58,7 +58,7 @@ services:
     restart: unless-stopped
     entrypoint: ["/usr/local/bin/local-ai-embedding-entrypoint.sh"]
     environment:
-      LLAMA_CPP_EMBED_MODEL_PATH: ${LLAMA_CPP_EMBED_MODEL_PATH-/models/qwen3-embedding-0.6b-q8_0.gguf}
+      LLAMA_CPP_EMBED_MODEL_PATH: ${LLAMA_CPP_EMBED_MODEL_PATH-/models/Qwen3-Embedding-0.6B-Q8_0.gguf}
       LLAMA_CPP_EMBED_HF_REPO: ${LLAMA_CPP_EMBED_HF_REPO:-}
       LLAMA_CPP_EMBED_CTX_SIZE: ${LLAMA_CPP_EMBED_CTX_SIZE:-8192}
       LLAMA_CPP_EMBED_N_GPU_LAYERS: ${LLAMA_CPP_EMBED_N_GPU_LAYERS:-0}
@@ -84,6 +84,15 @@ services:
       OLLAMA_URL: http://ollama:11434
       FAST_MODEL_OLLAMA: ${FAST_MODEL_OLLAMA:-devstral:24b}
       EMBED_MODEL_OLLAMA: ${EMBED_MODEL_OLLAMA:-qwen3-embedding:0.6b}
+      LLAMA_CPP_MODEL_PATH: ${LLAMA_CPP_MODEL_PATH:-/models/Qwen3.6-35B-A3B-UD-Q3_K_S.gguf}
+      LLAMA_CPP_MODEL_HF_REPO: ${LLAMA_CPP_MODEL_HF_REPO-unsloth/Qwen3.6-35B-A3B-GGUF}
+      LLAMA_CPP_MODEL_HF_FILE: ${LLAMA_CPP_MODEL_HF_FILE-Qwen3.6-35B-A3B-UD-Q3_K_S.gguf}
+      LLAMA_CPP_EMBED_MODEL_PATH: ${LLAMA_CPP_EMBED_MODEL_PATH-/models/Qwen3-Embedding-0.6B-Q8_0.gguf}
+      LLAMA_CPP_EMBED_MODEL_HF_REPO: ${LLAMA_CPP_EMBED_MODEL_HF_REPO-Qwen/Qwen3-Embedding-0.6B-GGUF}
+      LLAMA_CPP_EMBED_MODEL_HF_FILE: ${LLAMA_CPP_EMBED_MODEL_HF_FILE-Qwen3-Embedding-0.6B-Q8_0.gguf}
+      HF_TOKEN: ${HF_TOKEN:-}
+    volumes:
+      - ${MODEL_ROOT:-./models}:/models
     depends_on:
       ollama:
         condition: service_healthy
@@ -102,6 +111,13 @@ services:
       QDRANT_URL: http://qdrant:6333
       FAST_MODEL_OLLAMA: ${FAST_MODEL_OLLAMA:-devstral:24b}
       EMBED_MODEL_OLLAMA: ${EMBED_MODEL_OLLAMA:-qwen3-embedding:0.6b}
+      LLAMA_CPP_MODEL_PATH: ${LLAMA_CPP_MODEL_PATH:-/models/Qwen3.6-35B-A3B-UD-Q3_K_S.gguf}
+      LLAMA_CPP_MODEL_HF_REPO: ${LLAMA_CPP_MODEL_HF_REPO-unsloth/Qwen3.6-35B-A3B-GGUF}
+      LLAMA_CPP_MODEL_HF_FILE: ${LLAMA_CPP_MODEL_HF_FILE-Qwen3.6-35B-A3B-UD-Q3_K_S.gguf}
+      LLAMA_CPP_EMBED_MODEL_PATH: ${LLAMA_CPP_EMBED_MODEL_PATH-/models/Qwen3-Embedding-0.6B-Q8_0.gguf}
+      LLAMA_CPP_EMBED_MODEL_HF_REPO: ${LLAMA_CPP_EMBED_MODEL_HF_REPO-Qwen/Qwen3-Embedding-0.6B-GGUF}
+      LLAMA_CPP_EMBED_MODEL_HF_FILE: ${LLAMA_CPP_EMBED_MODEL_HF_FILE-Qwen3-Embedding-0.6B-Q8_0.gguf}
+      HF_TOKEN: ${HF_TOKEN:-}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-qwen3-embedding:0.6b}
     networks:
       - local-ai

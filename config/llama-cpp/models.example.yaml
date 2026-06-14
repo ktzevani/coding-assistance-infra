@@ -1,7 +1,9 @@
 profiles:
   code-strong:
     backend: llama-cpp
-    model_path: /models/qwen3.6-35b-a3b.gguf
+    model_path: /models/Qwen3.6-35B-A3B-UD-Q3_K_S.gguf
+    source: unsloth/Qwen3.6-35B-A3B-GGUF
+    source_file: Qwen3.6-35B-A3B-UD-Q3_K_S.gguf
     base_url: http://llama-cpp:8080/v1
     context: 16384
     n_gpu_layers: -1
