@@ -338,9 +338,18 @@ providers and registers:
       "enabled": true,
       "oauth": false
     }
+  },
+  "permission": {
+    "rag-mcp_*": "allow",
+    "rag-mcp_delete_project_index": "ask"
   }
 }
 ```
+
+OpenCode registers MCP tools with the server name as a prefix, so this server's
+tools are named `rag-mcp_index_project_docs`, `rag-mcp_search_project_memory`,
+and so on. Permission rules use last-match-wins ordering: the wildcard allows
+normal RAG tools, while the later delete rule requires explicit approval.
 
 When OpenCode connects, MCP protocol discovery gives it the RAG tool names,
 descriptions, and input schemas. This makes the tools available to the agent,

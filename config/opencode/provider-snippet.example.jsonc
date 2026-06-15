@@ -39,7 +39,9 @@
     "bash": "ask",
     "edit": "ask",
     "webfetch": "ask",
-    "websearch": "ask"
+    "websearch": "ask",
+    "rag-mcp_*": "allow",
+    "rag-mcp_delete_project_index": "ask"
   }
 }
 
