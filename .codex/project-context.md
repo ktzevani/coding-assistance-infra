@@ -1,6 +1,6 @@
 # Local AI Coding Facility - Project Context
 
-Last updated: 2026-06-12
+Last updated: 2026-06-15
 
 ## Purpose
 
@@ -48,6 +48,8 @@ scaffold. The repository contains:
 - Equivalent Bash and Windows PowerShell operator scripts.
 - Example OpenCode provider configuration.
 - Model profile examples and operating documentation.
+- Detailed README guidance for project OpenCode/RAG onboarding, MCP Inspector,
+  Qdrant inspection, and smoke-test scope.
 - Infrastructure-development dev container.
 
 Static checks performed on 2026-06-12:
@@ -58,7 +60,14 @@ Static checks performed on 2026-06-12:
   context-budget unit tests pass.
 - Bash operator scripts and container entrypoints are tracked as executable.
 
-Docker CLI and Compose v2.40.3 are available in the current dev container.
+Docker CLI and Compose v2.40.3 are available in the current dev container,
+but Docker socket access is disabled by default. Run Docker lifecycle commands
+from a trusted host shell unless the commented socket mount in
+`docker-compose.dev.yml` is intentionally enabled for a trusted agent and
+repository. The dev service currently uses `seccomp=unconfined` to permit
+Bubblewrap-style nested sandboxing; it must not be treated as a boundary for
+untrusted code.
+
 Static `docker compose config` validation was declined during the latest audit
 and has not been run. Generated stack-state files and persistent Ollama/Qdrant
 data show that operator scripts and services have been used previously, but
@@ -198,6 +207,9 @@ Windows PowerShell equivalents:
   backend or model identity.
 - Searches filter by backend and model to avoid mixing incompatible vectors.
 - A collection rejects a changed vector dimension with a clear error.
+- Starting RAG does not automatically index projects. Projects must be visible
+  beneath `WORKSPACE_ROOT`, and an MCP client or agent must call
+  `index_project_docs` before searches can return their documentation.
 
 MCP tools:
 
@@ -303,6 +315,12 @@ workspaces/                            Read-only project mounts for RAG
 - No arbitrary project directories are mounted into inference services.
 - OpenCode remains project-local with project-specific permissions.
 - Review OpenCode and MCP configuration before using untrusted repositories.
+- The infrastructure-development container does not mount the Docker socket by
+  default. Enabling it gives the agent effective administrative control of the
+  Docker daemon and should be limited to trusted agents and repositories.
+- The development service uses `seccomp=unconfined` for nested Bubblewrap
+  support; do not extend that setting to facility services or rely on it for
+  untrusted workloads.
 - Add authentication and transport security before any remote exposure.
 
 ## Known Gaps And Risks
@@ -322,6 +340,9 @@ workspaces/                            Read-only project mounts for RAG
   and context-budget policies.
 - RAG currently depends on the base Ollama service even when GGUF embeddings
   are selected, because Ollama is always part of the base deployment.
+- Host smoke-test scripts are permissive endpoint/model probes: unavailable
+  optional services print `SKIP`, and the scripts do not perform MCP discovery,
+  project indexing, retrieval-quality checks, or agent-use verification.
 
 ## Next Sensible Work
 
@@ -352,6 +373,11 @@ Use these files as the source of truth for operator guidance:
 - `docs/opencode-integration.md`
 - `docs/troubleshooting.md`
 - `docs/windows-hosts.md`
+
+`README.md` contains the detailed project onboarding workflow, including
+project exposure beneath `WORKSPACE_ROOT`, project-local OpenCode and MCP
+configuration, agent RAG instructions, collection tuning, MCP Inspector
+verification, Qdrant dashboard/API inspection, and Docker-socket trust guidance.
 
 The central architectural rule remains:
 

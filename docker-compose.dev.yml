@@ -8,7 +8,9 @@ services:
     working_dir: /opt/project
     volumes:
       - .:/opt/project
-      - /var/run/docker.sock:/var/run/docker.sock
+      # - /var/run/docker.sock:/var/run/docker.sock # enable if you trust you agent
+    security_opt:
+      - seccomp=unconfined
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
