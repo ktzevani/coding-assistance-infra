@@ -460,16 +460,10 @@ server's discovered tools and schemas. From a dev container prepared as above:
 npx @modelcontextprotocol/inspector
 ```
 
-In Inspector, select the Streamable HTTP transport and connect to:
+In Inspector, select the Streamable HTTP transport and Proxy connection type and connect to:
 
 ```text
 http://host.docker.internal:8765/mcp
-```
-
-When running Inspector directly on the infrastructure host, use:
-
-```text
-http://127.0.0.1:8765/mcp
 ```
 
 Verify the RAG path in this order:

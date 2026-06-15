@@ -6,6 +6,8 @@ RUN apk add --no-cache \
     git \
     jq \
     make \
+    nodejs \
+    npm \
     python3 \
     py3-pip \
     py3-ruff \

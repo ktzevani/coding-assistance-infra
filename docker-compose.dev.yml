@@ -3,7 +3,7 @@ services:
     profiles: ["dev"]
     build:
       context: images/dev
-    image: ${COMPOSE_PROJECT_NAME:-coding-assistance-infra}-dev:latest
+    image: ${COMPOSE_PROJECT_NAME:-coding-assistance-infra}/dev:latest
     command: sleep infinity
     working_dir: /opt/project
     volumes:
