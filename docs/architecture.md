@@ -10,6 +10,13 @@ embedding llama.cpp servers are separate explicit profiles because they load
 different GGUF models with different server modes. RAG is a separate override
 because inference must remain useful when retrieval is down.
 
+The Bash and PowerShell wrappers assemble the selected backend, overrides, and
+profiles for operators. When GGUF embeddings are requested, they normalize
+feature ordering so `docker-compose.embeddings-gguf.yml` is applied after
+`docker-compose.rag.yml` and its embedding-backend selection wins. Each wrapper
+records its own stack state, so operators must use the matching wrapper to stop
+the stack.
+
 RAG does not live inside an inference model. The MCP service embeds documents
 and queries through either Ollama or `llama-cpp-embeddings`, stores and searches
 vectors in Qdrant, then returns relevant text to the project client. OpenCode

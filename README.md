@@ -29,15 +29,18 @@ default.
 ## 🗂️ Repository Layout
 
 ```text
+AGENTS.md                      Cross-agent repository instructions
 .devcontainer/                 Infrastructure-development container
 config/                        Model, RAG, and OpenCode examples
 images/                        Thin custom service images
 scripts/linux/                 Linux/macOS Bash operator commands
 scripts/windows/               Windows PowerShell operator commands
-docs/                          Architecture and operating guidance
+docs/                          Architecture, roadmap, and operating guidance
 docker-compose.yml             Base Ollama deployment and optional services
 docker-compose.{cpu,nvidia,amd,rag,embeddings-gguf,dev}.yml
 ```
+
+See [docs/TODO.md](docs/TODO.md) for planned work and hardening priorities.
 
 ## ✅ Prerequisites
 
