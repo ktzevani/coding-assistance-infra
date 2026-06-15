@@ -29,9 +29,10 @@ services:
       RAG_MAX_CHUNK_TOKENS: ${RAG_MAX_CHUNK_TOKENS:-600}
       RAG_MAX_CONTEXT_TOKENS: ${RAG_MAX_CONTEXT_TOKENS:-4000}
       RAG_COLLECTIONS_CONFIG: ${RAG_COLLECTIONS_CONFIG:-/config/rag/collections.example.yaml}
+      RAG_WORKSPACE_ROOT: ${RAG_WORKSPACE_ROOT:-./workspaces}
       WORKSPACE_ROOT: /workspaces
     volumes:
-      - ${WORKSPACE_ROOT:-./workspaces}:/workspaces:ro
+      - ${RAG_WORKSPACE_ROOT:-./workspaces}:/workspaces:ro
       - ./config/rag:/config/rag:ro
     ports:
       - "127.0.0.1:${RAG_MCP_HOST_PORT:-8765}:8765"
