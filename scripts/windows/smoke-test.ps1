@@ -45,6 +45,7 @@ $embedPort = Get-EnvironmentValue -Name "LLAMA_CPP_EMBED_HOST_PORT" -Default "80
 $qdrantPort = Get-EnvironmentValue -Name "QDRANT_HOST_PORT" -Default "6333"
 $fastModel = Get-EnvironmentValue -Name "FAST_MODEL_OLLAMA" -Default "devstral:24b"
 $ollamaEmbedModel = Get-EnvironmentValue -Name "EMBED_MODEL_OLLAMA" -Default "qwen3-embedding:0.6b"
+$llamaChatModel = Get-EnvironmentValue -Name "LLAMA_CPP_CHAT_MODEL" -Default "qwen3-coder-30b-64k"
 $embeddingModel = "local"
 
 Test-GetEndpoint "Ollama native API" "http://127.0.0.1:$ollamaPort/api/tags"
@@ -63,7 +64,7 @@ Test-PostEndpoint "Ollama chat" "http://127.0.0.1:$ollamaPort/v1/chat/completion
     max_tokens = 4
 }
 Test-PostEndpoint "llama.cpp chat" "http://127.0.0.1:$llamaPort/v1/chat/completions" @{
-    model = "local"
+    model = $llamaChatModel
     messages = @(@{ role = "user"; content = "Reply OK" })
     max_tokens = 4
 }
@@ -71,4 +72,3 @@ Test-PostEndpoint "llama.cpp embeddings" "http://127.0.0.1:$embedPort/v1/embeddi
     model = $embeddingModel
     input = "ping"
 }
-

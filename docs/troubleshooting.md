@@ -21,18 +21,30 @@ is using the WSL 2 backend with a compatible NVIDIA Windows driver.
 
 ## llama.cpp Exits Immediately
 
-Confirm `LLAMA_CPP_MODEL_PATH` is a container path beneath `/models` and its
-host file exists beneath `MODEL_ROOT`. Reduce context, batch size, or GPU layers
-after an out-of-memory failure.
+Confirm `LLAMA_CPP_CONFIG_ROOT` contains `models.ini` and that
+`LLAMA_CPP_MODELS_PRESET` is its mounted container path (normally
+`/config/models.ini`). Every `model` path in the preset must be beneath
+`/models`, with the corresponding host file beneath `MODEL_ROOT`.
+
+If a request reports an unknown model, use a section name from `models.ini` as
+the request's `model` value. If loading a profile runs out of memory, reduce its
+context, batch size, GPU layers, tensor offload, or KV-cache precision in
+`models.ini`. Router-wide boolean values accept `true`/`false`, `1`/`0`,
+`yes`/`no`, or `on`/`off`.
+
+`pull-models` requires a complete path/repository/file triplet at each numbered
+index and stops at the first entirely empty index. Keep indices consecutive.
 
 ## RAG Indexing Fails
 
 Confirm `RAG_COLLECTIONS_CONFIG` points to valid YAML whose collection name
 matches `QDRANT_COLLECTION`. Missing collection entries use built-in patterns.
 
-Confirm the project is mounted beneath `WORKSPACE_ROOT` and the selected
-embedding backend is available. For GGUF embeddings, confirm the model path or
-Hugging Face repository, pooling mode, and `gguf-embeddings` feature. Inspect:
+Confirm the project is beneath the host `RAG_WORKSPACE_ROOT`; the service mounts
+that directory at its internal `WORKSPACE_ROOT` of `/workspaces`. Confirm the
+selected embedding backend is available. For GGUF embeddings, confirm the model
+path or Hugging Face repository, pooling mode, and `gguf-embeddings` feature.
+Inspect:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.rag.yml logs rag-mcp qdrant

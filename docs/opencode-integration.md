@@ -1,13 +1,22 @@
 # OpenCode Integration
 
 Install and pin OpenCode separately in each project dev container. Copy the
-ideas from `config/opencode/provider-snippet.example.jsonc` into the project's
-reviewed OpenCode configuration.
+reviewed `config/clients/opencode.example.json` into the project and adapt it
+there. The example intentionally remains client configuration rather than
+infrastructure-service configuration.
 
 Provider model keys must match the IDs returned by the serving endpoint. The
-example uses the default Ollama `devstral:24b` model and llama.cpp's served
-`local` model ID. Update the Ollama key and default model when
-`FAST_MODEL_OLLAMA` changes.
+example uses the default Ollama `devstral:24b` model and exposes every named
+section from `config/llama-cpp/models.ini` as a llama.cpp model choice. A
+request's model ID selects the router profile and therefore its context,
+output, cache, and sampling configuration. Update the provider keys whenever
+the preset section names or `FAST_MODEL_OLLAMA` change.
+
+The example also defines request timeouts, a small model, disabled sharing,
+project-local LSP commands, compaction, MCP access, and tool permissions. These
+are starting points, not facility-wide policy. In particular, ensure
+`OPENCODE_MODEL` uses the configured `llama.cpp/<profile>` provider/model form
+and that every declared LSP command is installed in the project dev container.
 
 The example enables the central `rag-mcp` HTTP endpoint as a remote MCP server.
 It disables OAuth because this loopback-only deployment does not provide OAuth.
@@ -32,4 +41,3 @@ http://rag-mcp:8765/mcp
 
 Keep conservative tool permissions and review project-local OpenCode and MCP
 configuration before running an untrusted repository.
-

@@ -31,11 +31,15 @@ services:
     image: ${COMPOSE_PROJECT_NAME:-coding-assistance-infra}/llama-cpp-server:latest
     restart: unless-stopped
     environment:
+      LLAMA_CPP_HOST: 0.0.0.0
+      LLAMA_CPP_HOST_PORT: 8080
       LLAMA_CPP_MODELS_PRESET: ${LLAMA_CPP_MODELS_PRESET:-/config/models.ini}
-      LLAMA_CPP_HOST_PORT: ${LLAMA_CPP_HOST_PORT:-8080}
+      LLAMA_CPP_MODELS_MAX: ${LLAMA_CPP_MODELS_MAX:-1}
+      LLAMA_CPP_MODELS_AUTOLOAD: ${LLAMA_CPP_MODELS_AUTOLOAD:-true}
+      LLAMA_CPP_METRICS: ${LLAMA_CPP_METRICS:-false}
     volumes:
       - ${MODEL_ROOT:-./models}:/models:ro
-      - ${LLAMA_CPP_CONFIG_ROOT:-./config/llama.cpp}/models.ini:/config/models.ini:ro
+      - ${LLAMA_CPP_CONFIG_ROOT:-./config/llama-cpp}/models.ini:/config/models.ini:ro
     ports:
       - "127.0.0.1:${LLAMA_CPP_HOST_PORT:-8080}:8080"
     networks:
@@ -51,15 +55,15 @@ services:
     restart: unless-stopped
     entrypoint: ["/usr/local/bin/local-ai-embedding-entrypoint.sh"]
     environment:
-      LLAMA_CPP_EMBED_MODEL_PATH: ${LLAMA_CPP_EMBED_MODEL_PATH-/models/Qwen3-Embedding-0.6B-Q8_0.gguf}
+      LLAMA_CPP_EMBED_MODEL_PATH: ${LLAMA_CPP_EMBED_MODEL_PATH:-/models/Qwen3-Embedding-0.6B-Q8_0.gguf}
       LLAMA_CPP_EMBED_HF_REPO: ${LLAMA_CPP_EMBED_HF_REPO:-}
       LLAMA_CPP_EMBED_CTX_SIZE: ${LLAMA_CPP_EMBED_CTX_SIZE:-8192}
-      LLAMA_CPP_EMBED_N_GPU_LAYERS: ${LLAMA_CPP_EMBED_N_GPU_LAYERS:-0}
+      LLAMA_CPP_EMBED_N_GPU_LAYERS: ${LLAMA_CPP_EMBED_N_GPU_LAYERS_CPU:-0}
       LLAMA_CPP_EMBED_THREADS: ${LLAMA_CPP_EMBED_THREADS:-8}
       LLAMA_CPP_EMBED_BATCH_SIZE: ${LLAMA_CPP_EMBED_BATCH_SIZE:-2048}
       LLAMA_CPP_EMBED_UBATCH_SIZE: ${LLAMA_CPP_EMBED_UBATCH_SIZE:-512}
       LLAMA_CPP_EMBED_PARALLEL: ${LLAMA_CPP_EMBED_PARALLEL:-1}
-      LLAMA_CPP_EMBED_POOLING: ${LLAMA_CPP_EMBED_POOLING-last}
+      LLAMA_CPP_EMBED_POOLING: ${LLAMA_CPP_EMBED_POOLING:-last}
     volumes:
       - ${MODEL_ROOT:-./models}:/models:ro
       - ${DATA_ROOT:-./data}/llama-cpp-cache:/root/.cache/llama.cpp
@@ -83,9 +87,9 @@ services:
       LLAMA_CPP_MODEL_PATH_2: ${LLAMA_CPP_MODEL_PATH_2:-}
       LLAMA_CPP_MODEL_HF_REPO_2: ${LLAMA_CPP_MODEL_HF_REPO_2:-}
       LLAMA_CPP_MODEL_HF_FILE_2: ${LLAMA_CPP_MODEL_HF_FILE_2:-}
-      LLAMA_CPP_EMBED_MODEL_PATH: ${LLAMA_CPP_EMBED_MODEL_PATH:-}
-      LLAMA_CPP_EMBED_MODEL_HF_REPO: ${LLAMA_CPP_EMBED_MODEL_HF_REPO:-}
-      LLAMA_CPP_EMBED_MODEL_HF_FILE: ${LLAMA_CPP_EMBED_MODEL_HF_FILE:-}
+      LLAMA_CPP_EMBED_MODEL_PATH: ${LLAMA_CPP_EMBED_MODEL_PATH:-/models/Qwen3-Embedding-0.6B-Q8_0.gguf}
+      LLAMA_CPP_EMBED_MODEL_HF_REPO: ${LLAMA_CPP_EMBED_MODEL_HF_REPO:-Qwen/Qwen3-Embedding-0.6B-GGUF}
+      LLAMA_CPP_EMBED_MODEL_HF_FILE: ${LLAMA_CPP_EMBED_MODEL_HF_FILE:-Qwen3-Embedding-0.6B-Q8_0.gguf}
       HF_TOKEN: ${HF_TOKEN:-}
     volumes:
       - ${MODEL_ROOT:-./models}:/models
@@ -113,9 +117,10 @@ services:
       LLAMA_CPP_MODEL_PATH_2: ${LLAMA_CPP_MODEL_PATH_2:-}
       LLAMA_CPP_MODEL_HF_REPO_2: ${LLAMA_CPP_MODEL_HF_REPO_2:-}
       LLAMA_CPP_MODEL_HF_FILE_2: ${LLAMA_CPP_MODEL_HF_FILE_2:-}
-      LLAMA_CPP_EMBED_MODEL_PATH: ${LLAMA_CPP_EMBED_MODEL_PATH:-}
-      LLAMA_CPP_EMBED_MODEL_HF_REPO: ${LLAMA_CPP_EMBED_MODEL_HF_REPO:-}
-      LLAMA_CPP_EMBED_MODEL_HF_FILE: ${LLAMA_CPP_EMBED_MODEL_HF_FILE:-}
+      LLAMA_CPP_CHAT_MODEL: ${LLAMA_CPP_CHAT_MODEL:-qwen3-coder-30b-64k}
+      LLAMA_CPP_EMBED_MODEL_PATH: ${LLAMA_CPP_EMBED_MODEL_PATH:-/models/Qwen3-Embedding-0.6B-Q8_0.gguf}
+      LLAMA_CPP_EMBED_MODEL_HF_REPO: ${LLAMA_CPP_EMBED_MODEL_HF_REPO:-Qwen/Qwen3-Embedding-0.6B-GGUF}
+      LLAMA_CPP_EMBED_MODEL_HF_FILE: ${LLAMA_CPP_EMBED_MODEL_HF_FILE:-Qwen3-Embedding-0.6B-Q8_0.gguf}
       HF_TOKEN: ${HF_TOKEN:-}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-qwen3-embedding:0.6b}
     networks:

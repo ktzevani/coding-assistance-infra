@@ -5,10 +5,18 @@ access, and optional retrieval. A project dev container owns OpenCode, source,
 toolchains, tests, project instructions, and permissions.
 
 The base Compose file starts Ollama. Runtime-specific override files add CPU,
-NVIDIA, or AMD behavior without duplicating the services. The coding and
-embedding llama.cpp servers are separate explicit profiles because they load
-different GGUF models with different server modes. RAG is a separate override
+NVIDIA, or AMD behavior without duplicating the services. The optional coding
+llama.cpp service runs in routing mode and loads named profiles from
+`config/llama-cpp/models.ini`; clients choose a profile through the OpenAI
+`model` field. The separate embedding llama.cpp service loads one dedicated
+embedding GGUF with embedding-specific flags. RAG is a separate override
 because inference must remain useful when retrieval is down.
+
+The router defaults to one loaded coding profile at a time and autoloads a
+requested profile. Multiple profile names can share the same GGUF while varying
+context, output limits, cache types, batching, sampling, or other server
+parameters. The model directory and preset file are mounted read-only into the
+coding service.
 
 The Bash and PowerShell wrappers assemble the selected backend, overrides, and
 profiles for operators. When GGUF embeddings are requested, they normalize

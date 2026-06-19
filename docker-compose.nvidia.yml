@@ -12,8 +12,6 @@ services:
     build:
       args:
         LLAMA_CPP_BASE_IMAGE: ${LLAMA_CPP_CUDA_BASE_IMAGE:-ghcr.io/ggml-org/llama.cpp:server-cuda}
-    environment:
-      LLAMA_CPP_N_GPU_LAYERS: ${LLAMA_CPP_N_GPU_LAYERS:--1}
     deploy:
       resources:
         reservations:
@@ -27,7 +25,7 @@ services:
       args:
         LLAMA_CPP_BASE_IMAGE: ${LLAMA_CPP_CUDA_BASE_IMAGE:-ghcr.io/ggml-org/llama.cpp:server-cuda}
     environment:
-      LLAMA_CPP_EMBED_N_GPU_LAYERS: ${LLAMA_CPP_EMBED_N_GPU_LAYERS:--1}
+      LLAMA_CPP_EMBED_N_GPU_LAYERS: ${LLAMA_CPP_EMBED_N_GPU_LAYERS_NVIDIA:--1}
     deploy:
       resources:
         reservations:

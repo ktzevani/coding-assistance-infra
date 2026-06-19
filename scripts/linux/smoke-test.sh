@@ -45,7 +45,7 @@ post_check \
 post_check \
     "llama.cpp chat" \
     "http://127.0.0.1:${LLAMA_CPP_HOST_PORT:-8080}/v1/chat/completions" \
-    '{"model":"local","messages":[{"role":"user","content":"Reply OK"}],"max_tokens":4}'
+    "{\"model\":\"${LLAMA_CPP_CHAT_MODEL:-qwen3-coder-30b-64k}\",\"messages\":[{\"role\":\"user\",\"content\":\"Reply OK\"}],\"max_tokens\":4}"
 post_check \
     "llama.cpp embeddings" \
     "http://127.0.0.1:${LLAMA_CPP_EMBED_HOST_PORT:-8081}/v1/embeddings" \

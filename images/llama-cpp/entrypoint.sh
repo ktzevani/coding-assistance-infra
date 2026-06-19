@@ -4,30 +4,25 @@ set -eu
 # Router-only llama.cpp server entrypoint.
 #
 # Required/expected:
-#   LLAMA_CPP_MODELS_PRESET=/config/llama.cpp/models.ini
+#   LLAMA_CPP_MODELS_PRESET=/config/models.ini
 #
 # Sensible defaults for a single-GPU local coding-agent setup:
 #   - bind to 0.0.0.0 inside Docker
 #   - expose port 8080
 #   - allow only 1 loaded model/profile at a time
 #   - autoload requested model profiles
-#   - enable Flash Attention by default
-#   - enable continuous batching by default
 #
 # Important:
 #   Per-model parameters such as ctx-size, n-predict, cache-type-k/v,
-#   n-gpu-layers, override-tensor, batch-size, ubatch-size, sampling, etc.
-#   should remain in models.ini.
+#   n-gpu-layers, override-tensor, flash-attn, batch-size, ubatch-size,
+#   cont-batching, sampling, etc. should remain in models.ini.
 
-LLAMA_CPP_HOST="${LLAMA_CPP_HOST:-0.0.0.0}"
-LLAMA_CPP_HOST_PORT="${LLAMA_CPP_HOST_PORT:-8080}"
-
-LLAMA_CPP_MODELS_PRESET="${LLAMA_CPP_MODELS_PRESET:-/config/models.ini}"
-LLAMA_CPP_MODELS_MAX="${LLAMA_CPP_MODELS_MAX:-1}"
-LLAMA_CPP_FLASH_ATTN="${LLAMA_CPP_FLASH_ATTN:-on}"
-LLAMA_CPP_CONT_BATCHING="${LLAMA_CPP_CONT_BATCHING:-true}"
-LLAMA_CPP_MODELS_AUTOLOAD="${LLAMA_CPP_MODELS_AUTOLOAD:-true}"
-LLAMA_CPP_METRICS="${LLAMA_CPP_METRICS:-false}"
+: "${LLAMA_CPP_HOST:?LLAMA_CPP_HOST must be set}"
+: "${LLAMA_CPP_HOST_PORT:?LLAMA_CPP_HOST_PORT must be set}"
+: "${LLAMA_CPP_MODELS_PRESET:?LLAMA_CPP_MODELS_PRESET must be set}"
+: "${LLAMA_CPP_MODELS_MAX:?LLAMA_CPP_MODELS_MAX must be set}"
+: "${LLAMA_CPP_MODELS_AUTOLOAD:?LLAMA_CPP_MODELS_AUTOLOAD must be set}"
+: "${LLAMA_CPP_METRICS:?LLAMA_CPP_METRICS must be set}"
 
 if [ ! -f "${LLAMA_CPP_MODELS_PRESET}" ]; then
   echo "Missing models preset file: ${LLAMA_CPP_MODELS_PRESET}" >&2
@@ -45,18 +40,6 @@ case "${LLAMA_CPP_MODELS_AUTOLOAD}" in
   true|1|yes|on) set -- "$@" --models-autoload ;;
   false|0|no|off) set -- "$@" --no-models-autoload ;;
   *) echo "Invalid LLAMA_CPP_MODELS_AUTOLOAD value: ${LLAMA_CPP_MODELS_AUTOLOAD}" >&2; exit 2 ;;
-esac
-
-case "${LLAMA_CPP_FLASH_ATTN}" in
-  true|1|yes|on|auto) set -- "$@" --flash-attn "${LLAMA_CPP_FLASH_ATTN}" ;;
-  false|0|no|off) set -- "$@" --flash-attn off ;;
-  *) echo "Invalid LLAMA_CPP_FLASH_ATTN value: ${LLAMA_CPP_FLASH_ATTN}" >&2; exit 2 ;;
-esac
-
-case "${LLAMA_CPP_CONT_BATCHING}" in
-  true|1|yes|on) set -- "$@" --cont-batching ;;
-  false|0|no|off) set -- "$@" --no-cont-batching ;;
-  *) echo "Invalid LLAMA_CPP_CONT_BATCHING value: ${LLAMA_CPP_CONT_BATCHING}" >&2; exit 2 ;;
 esac
 
 case "${LLAMA_CPP_METRICS}" in

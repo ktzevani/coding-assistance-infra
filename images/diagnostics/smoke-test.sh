@@ -44,7 +44,7 @@ post_check \
 post_check \
     "llama.cpp chat" \
     "${LLAMA_CPP_URL:-http://llama-cpp:8080}/v1/chat/completions" \
-    '{"model":"local","messages":[{"role":"user","content":"Reply OK"}],"max_tokens":4}'
+    "{\"model\":\"${LLAMA_CPP_CHAT_MODEL:-qwen3-coder-30b-64k}\",\"messages\":[{\"role\":\"user\",\"content\":\"Reply OK\"}],\"max_tokens\":4}"
 post_check \
     "llama.cpp embeddings" \
     "${LLAMA_CPP_EMBED_URL:-http://llama-cpp-embeddings:8080}/v1/embeddings" \

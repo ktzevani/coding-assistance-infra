@@ -78,10 +78,16 @@ Windows paths are tested carefully with Docker Desktop file sharing.
 Models mounted into containers must still use Linux container paths in `.env`:
 
 ```dotenv
-LLAMA_CPP_MODEL_PATH=/models/my-coding-model.gguf
+LLAMA_CPP_MODEL_PATH_1=/models/my-coding-model.gguf
+LLAMA_CPP_MODEL_HF_REPO_1=owner/repository
+LLAMA_CPP_MODEL_HF_FILE_1=my-coding-model.gguf
 LLAMA_CPP_EMBED_MODEL_PATH=/models/my-embedding-model.gguf
 LLAMA_CPP_EMBED_MODEL_ID=my-embedding-model
 ```
+
+The coding path in `config/llama-cpp/models.ini` must match the container path.
+Clients select its section name as the model ID; Windows host paths do not
+appear in the preset.
 
 ## Dev Containers
 

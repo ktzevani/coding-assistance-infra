@@ -31,14 +31,17 @@ Do not move project-specific logic or OpenCode into this facility by default.
 ## Architecture Invariants
 
 - Ollama is the always-present base inference service.
-- Coding llama.cpp and embedding llama.cpp are separate optional services with
-  different models, flags, and lifecycle profiles.
+- Coding llama.cpp is an optional routing-mode service whose client-visible
+  profiles live in `config/llama-cpp/models.ini`. Embedding llama.cpp is a
+  separate optional single-model service with different flags and lifecycle.
 - RAG is independent of final inference: `rag-mcp` retrieves curated text and the
   project client decides whether to include it in an Ollama or llama.cpp prompt.
 - RAG indexes curated documentation and durable project memory, not source trees
   by default.
 - Starting RAG does not index projects automatically. Projects must be visible
-  beneath `WORKSPACE_ROOT` and indexed through `index_project_docs`.
+  beneath the host `RAG_WORKSPACE_ROOT` mount and indexed through
+  `index_project_docs`; the service sees that mount as `WORKSPACE_ROOT` at
+  `/workspaces`.
 - A Qdrant collection belongs to one embedding backend, model identity, and
   vector dimension. Changing embedding models requires a new collection or a
   rebuilt index.

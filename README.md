@@ -11,7 +11,7 @@ A Docker Compose deployment for shared, local-first coding-agent infrastructure.
 ```mermaid
 flowchart LR
   P[Project dev containers<br/>OpenCode + tools] -->|inference| O[Ollama<br/>fast model]
-  P -->|inference with retrieved context| L[llama.cpp<br/>strong GGUF profile]
+  P -->|inference with retrieved context| L[llama.cpp router<br/>selectable GGUF profiles]
   P -->|MCP| R[RAG MCP]
   R -->|choose embedding backend| OE[Ollama embeddings]
   R -->|choose embedding backend| GE[llama.cpp<br/>embedding GGUF]
@@ -30,8 +30,12 @@ default.
 
 ```text
 AGENTS.md                      Cross-agent repository instructions
+.env.example                   Canonical operator configuration and defaults
 .devcontainer/                 Infrastructure-development container
-config/                        Model, RAG, and OpenCode examples
+config/clients/                Project-local client configuration examples
+config/llama-cpp/models.ini    Active llama.cpp router profiles
+config/ollama/                 Ollama model examples
+config/rag/                    RAG collection policies
 images/                        Thin custom service images
 scripts/linux/                 Linux/macOS Bash operator commands
 scripts/windows/               Windows PowerShell operator commands
@@ -93,32 +97,62 @@ Use NVIDIA or AMD acceleration:
 .\scripts\windows\up.ps1 amd
 ```
 
-`pull-models` prepares all default model assets: both Ollama models, the
-llama.cpp coding GGUF, and the llama.cpp embedding GGUF. Existing GGUF files
-are skipped and interrupted downloads resume from `.part` files. The wrapper
-rebuilds its small download image before running, so changes to its pull logic
-take effect immediately.
+With the example `.env`, `pull-models` prepares both Ollama models, the two
+indexed llama.cpp coding GGUFs, and the llama.cpp embedding GGUF. Existing GGUF
+files are skipped and interrupted downloads resume from `.part` files. The
+wrapper rebuilds its small download image before running, so changes to its pull
+logic take effect immediately.
 
 Ollama models are stored beneath `DATA_ROOT/ollama`. GGUF files are stored
 beneath `MODEL_ROOT`; with the example `.env`, that is `./models` in this
 repository. Download progress shows `/models/...` because that is the
 corresponding path inside the download container.
 
-Model pulls can be large. The default coding GGUF is approximately 15.4 GB.
-Change the model source settings in `.env` before `pull-models.sh` when
-validating on limited disk, memory, or network capacity.
+Model pulls can be large. Configure only the GGUFs required by the selected
+profiles before running `pull-models.sh`, especially on limited disk, memory,
+or network capacity.
 
 ## 🦙 llama.cpp
 
-The default pull configuration downloads Unsloth Qwen3.6 35B A3B UD-Q3_K_S
-into `./models`. Override the path and Hugging Face repo/file settings in `.env`
-to select another coding GGUF, then enable the optional service:
+The coding service runs llama.cpp in routing mode. Profile sections in
+[`config/llama-cpp/models.ini`](config/llama-cpp/models.ini) define model paths,
+context and output limits, KV-cache types, batching, offload, and sampling. A
+client selects a profile by sending its section name as the OpenAI-compatible
+`model` value. The supplied profiles are:
+
+| Profile | Context | Maximum output | Startup behavior |
+|---|---:|---:|---|
+| `qwen3-coder-30b-32k` | 32k | 4k | On demand |
+| `qwen3-coder-30b-64k` | 64k | 8k | Loaded at startup |
+| `qwen3-coder-30b-128k` | 128k | 12k | On demand |
+| `qwen3-coder-30b-128k-planning` | 128k | 16k | On demand |
+| `qwen3-coder-30b-256k` | 256k | 16k | On demand |
+| `qwen3-6-35b-a3b-64k` | 64k | 12k | On demand |
+
+Profiles may share one GGUF. With `LLAMA_CPP_MODELS_MAX=1`, selecting another
+profile unloads the current one as needed; `LLAMA_CPP_MODELS_AUTOLOAD=true`
+allows the router to load a requested profile automatically. The model files
+referenced by enabled profiles must exist beneath `MODEL_ROOT`.
+
+To let `pull-models` download coding GGUFs, add indexed triplets to `.env`.
+The current Compose configuration forwards indices 1 and 2, and numbering
+stops at the first completely empty index:
 
 ```dotenv
-LLAMA_CPP_MODEL_PATH=/models/Qwen3.6-35B-A3B-UD-Q3_K_S.gguf
-LLAMA_CPP_MODEL_HF_REPO=unsloth/Qwen3.6-35B-A3B-GGUF
-LLAMA_CPP_MODEL_HF_FILE=Qwen3.6-35B-A3B-UD-Q3_K_S.gguf
+LLAMA_CPP_MODEL_PATH_1=/models/Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL.gguf
+LLAMA_CPP_MODEL_HF_REPO_1=unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF
+LLAMA_CPP_MODEL_HF_FILE_1=Qwen3-Coder-30B-A3B-Instruct-UD-Q4_K_XL.gguf
+
+LLAMA_CPP_MODEL_PATH_2=/models/Qwen3.6-35B-A3B-UD-Q3_K_S.gguf
+LLAMA_CPP_MODEL_HF_REPO_2=unsloth/Qwen3.6-35B-A3B-GGUF
+LLAMA_CPP_MODEL_HF_FILE_2=Qwen3.6-35B-A3B-UD-Q3_K_S.gguf
 ```
+
+All three values at an index are required. To manage a coding GGUF outside
+`pull-models`, omit its triplet and place it at the path used by `models.ini`.
+Change `LLAMA_CPP_CONFIG_ROOT` to mount a different host directory containing
+`models.ini`; `LLAMA_CPP_MODELS_PRESET` is its container path and normally
+remains `/config/models.ini`.
 
 ```bash
 ./scripts/linux/up.sh nvidia llama
@@ -128,10 +162,10 @@ LLAMA_CPP_MODEL_HF_FILE=Qwen3.6-35B-A3B-UD-Q3_K_S.gguf
 .\scripts\windows\up.ps1 nvidia llama
 ```
 
-The CPU profile uses the official `server` image with GPU layers set to `0`;
-NVIDIA uses `server-cuda` with GPU layers defaulting to `-1` for full offload.
-Context, threads, batching, KV-cache types, parallel slots, and GPU layers are
-all environment-controlled.
+The CPU profile uses the official `server` image and NVIDIA uses `server-cuda`.
+Coding-model runtime parameters belong in `models.ini`. Compose supplies the
+router-wide lifecycle settings from `.env`, including maximum loaded models,
+autoload, and metrics.
 
 ## 🔎 Optional RAG
 
@@ -194,9 +228,10 @@ Available MCP tools:
 - `delete_project_index`
 
 Starting the RAG services does not automatically index projects. A project must
-be visible beneath the configured `WORKSPACE_ROOT`, and an MCP client or agent
-must call `index_project_docs` with the project's directory name before searches
-can return its documentation. Re-index after changing curated documentation.
+be visible beneath the host path configured by `RAG_WORKSPACE_ROOT`, and an MCP
+client or agent must call `index_project_docs` with the project's directory name
+before searches can return its documentation. Re-index after changing curated
+documentation.
 
 `LLAMA_CPP_EMBED_MODEL_ID` identifies the loaded GGUF in stored vectors and
 search filters. Change it whenever the GGUF model changes.
@@ -240,9 +275,10 @@ that should use the facility.
 
 ### 1. Make The Project Visible To RAG
 
-The `rag-mcp` service receives `${WORKSPACE_ROOT}` as a read-only mount at
-`/workspaces`. With the example infrastructure `.env`, `WORKSPACE_ROOT` is
-`./workspaces`, so make each project available at:
+The `rag-mcp` service mounts the host directory configured by
+`RAG_WORKSPACE_ROOT` read-only at `/workspaces`. With the example infrastructure
+`.env`, `RAG_WORKSPACE_ROOT` is `./workspaces`, so make each project available
+at:
 
 ```text
 <infrastructure-repository>/workspaces/<project-name>
@@ -251,11 +287,12 @@ The `rag-mcp` service receives `${WORKSPACE_ROOT}` as a read-only mount at
 Place or mount the project beneath this directory. A symlink to a project
 outside the bind-mounted root is not reliably available inside Docker,
 especially on Docker Desktop. Alternatively, set the infrastructure
-`WORKSPACE_ROOT` to a common host directory containing all projects that may be
-indexed. Only grant this service access to trusted projects; every directory
-beneath that root is readable by `rag-mcp`.
+`RAG_WORKSPACE_ROOT` to a common host directory containing all projects that
+may be indexed. Only grant this service access to trusted projects; every
+directory beneath that root is readable by `rag-mcp`.
 
-The MCP project argument is the path relative to `WORKSPACE_ROOT`. For example,
+Inside the service, `WORKSPACE_ROOT` is fixed at `/workspaces`. The MCP project
+argument is relative to that container path. For example,
 `/workspaces/payments-api` is indexed with:
 
 ```text
@@ -279,7 +316,7 @@ it must be able to reach the host-published facility endpoints. A representative
   ],
   "postCreateCommand": ".devcontainer/post-create.sh",
   "remoteEnv": {
-    "OPENCODE_MODEL": "llamacpp/local"
+    "OPENCODE_MODEL": "llama.cpp/qwen3-coder-30b-64k"
   },
   "forwardPorts": [6274, 6277],
   "customizations": {
@@ -328,9 +365,12 @@ versions after validating them.
 ### 3. Configure OpenCode Providers And MCP
 
 Start from
-[`config/opencode/provider-snippet.example.jsonc`](config/opencode/provider-snippet.example.jsonc)
-inside the project. It configures the shared Ollama and llama.cpp inference
-providers and registers:
+[`config/clients/opencode.example.json`](config/clients/opencode.example.json)
+inside the project. It is a full example rather than a provider-only snippet:
+it configures Ollama and all llama.cpp router profiles, the default and small
+models, request timeouts, MCP, LSP, compaction, sharing, and tool permissions.
+Review every project-local choice before using it. Its MCP configuration
+registers:
 
 ```jsonc
 {
@@ -471,7 +511,8 @@ Verify the RAG path in this order:
 1. Confirm Inspector discovers `index_project_docs`, `search_project_memory`,
    `list_collections`, and `delete_project_index`.
 2. Call `list_collections`.
-3. Call `index_project_docs` for a project visible beneath `WORKSPACE_ROOT`.
+3. Call `index_project_docs` for a project visible beneath
+   `RAG_WORKSPACE_ROOT` on the host.
 4. Search for a distinctive fact from that project's curated documentation.
 5. Confirm results contain sensible scores, project names, paths, and content.
 
@@ -516,8 +557,8 @@ for common connection and retrieval failures.
 
 ## 🎛️ Model Tuning
 
-The `.env` file is the active v1 profile layer. Example future-compatible YAML
-profiles live under `config/ollama` and `config/llama-cpp`.
+Ollama service settings live in `.env`. Active llama.cpp coding profiles live
+in `config/llama-cpp/models.ini`.
 
 Set `GPU_COUNT` to `all` or a positive integer to control how many NVIDIA
 devices each accelerated service reserves.
