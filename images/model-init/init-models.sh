@@ -54,6 +54,34 @@ for model in "${FAST_MODEL_OLLAMA:-devstral:24b}" "${EMBED_MODEL_OLLAMA:-qwen3-e
     echo
 done
 
-download_gguf "llama.cpp coding model" "${LLAMA_CPP_MODEL_HF_REPO:-}" "${LLAMA_CPP_MODEL_HF_FILE:-}" "${LLAMA_CPP_MODEL_PATH:-/models/Qwen3.6-35B-A3B-UD-Q3_K_S.gguf}"
-download_gguf "llama.cpp embedding model" "${LLAMA_CPP_EMBED_MODEL_HF_REPO:-}" "${LLAMA_CPP_EMBED_MODEL_HF_FILE:-}" "${LLAMA_CPP_EMBED_MODEL_PATH:-/models/Qwen3-Embedding-0.6B-Q8_0.gguf}"
+i=1
+while :; do
+    repo_var="LLAMA_CPP_MODEL_HF_REPO_${i}"
+    file_var="LLAMA_CPP_MODEL_HF_FILE_${i}"
+    path_var="LLAMA_CPP_MODEL_PATH_${i}"
 
+    repo="${!repo_var:-}"
+    file="${!file_var:-}"
+    path="${!path_var:-}"
+
+    if [[ -z "${repo}" && -z "${file}" && -z "${path}" ]]; then
+        break
+    fi
+
+    if [[ -z "${repo}" || -z "${file}" || -z "${path}" ]]; then
+        echo "Incomplete llama.cpp model config at index ${i}" >&2
+        echo "Expected all of:" >&2
+        echo "  ${repo_var}" >&2
+        echo "  ${file_var}" >&2
+        echo "  ${path_var}" >&2
+        exit 2
+    fi
+
+    download_gguf \
+        "llama.cpp model ${i}" \
+        "${repo}" \
+        "${file}" \
+        "${path}"
+
+    i=$((i + 1))
+done
